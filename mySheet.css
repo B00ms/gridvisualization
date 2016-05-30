@@ -1,0 +1,33 @@
+node {
+	text-alignment: under;
+	size:14px;
+	shadow-mode:plain;
+	shadow-offset:0px; 
+ 	shadow-color:#E4E4E4;
+ 	/*z-index: 0;*/
+	}
+
+edge{
+	/*z-index: 1;*/
+	size:2px;
+}
+
+node.Storage {
+	fill-color: blue;
+	}
+	
+node.ConventionalGenerator {
+	fill-color: gray;
+	}	
+	
+node.RewGenerator {
+	fill-color: green;
+}
+
+node.Consumer {
+	fill-color: yellow;
+}
+
+node.InnerNode {
+	fill-color: #5E5E5E;
+}
