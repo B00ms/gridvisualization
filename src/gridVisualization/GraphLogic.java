@@ -16,10 +16,11 @@ import org.graphstream.ui.view.Viewer;
 public class GraphLogic {
 
 	private static Graph graph;
+	private static String directory = "";
 
 	public GraphLogic() {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
-		graphStream();
+		//graphStream();
 	}
 
 	public static void graphStream(){
@@ -27,7 +28,7 @@ public class GraphLogic {
 		graph = new MultiGraph("mygraph");
 	    graph.addAttribute("ui.quality");
 	    graph.addAttribute("ui.antialias");
-        String file = "graphstate/graphstate0.dgs";
+        String file = directory;
         try {
 			FileSource fileSource = FileSourceFactory.sourceFor(file);
 
@@ -114,7 +115,7 @@ public class GraphLogic {
 	    graph.addAttribute("ui.quality");
 	    graph.addAttribute("ui.antialias");
 
-        String file = "graphstate/"+filename;
+        String file = directory+"\\"+filename;
         try {
 			FileSource fileSource = FileSourceFactory.sourceFor(file);
 
@@ -128,5 +129,9 @@ public class GraphLogic {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void setDirectory(String directory){
+		this.directory = directory;
 	}
 }

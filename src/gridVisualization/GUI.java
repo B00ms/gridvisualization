@@ -12,22 +12,28 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.FileChooserUI;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.geom.Point3;
 import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.graphicGraph.stylesheet.Selector;
+import org.graphstream.ui.layout.LayoutRunner;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 
@@ -68,6 +74,14 @@ public class GUI {
 	private Label lblMinimumCharge = new Label();
 	private Label lblChargeEfficiency = new Label();
 	private Label lblDischargeEfficiency = new Label();
+	
+	private JFileChooser fileChooser = new JFileChooser();
+	JButton btnOpenSelectDirectory = new JButton("Select directory");
+	private String selectedDirectory = "";
+	
+	private boolean fuckingleavethecomboboxalone = false;
+	
+	private int counter = 0;
 
 	public GUI(GraphLogic graphLogic) {
 		System.out.println("gui construct");
@@ -78,7 +92,7 @@ public class GUI {
 		view = viewer.addDefaultView(false);
 
 		myFrame.setLayout(new BorderLayout(5, 0));
-		myFrame.add(view, BorderLayout.CENTER);
+		//myFrame.add(view, BorderLayout.CENTER);
 		myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		myFrame.setLocationRelativeTo(null);
@@ -102,6 +116,10 @@ public class GUI {
 
 		NaturalOrderComparator comparator = new NaturalOrderComparator();
 		Arrays.sort(fileNames, comparator);
+		
+		informationPanel.add(btnOpenSelectDirectory);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooser.setCurrentDirectory(new File("./"));
 
 		timestepDropdown = new JComboBox<String>(fileNames);
 		timestepDropdown.setFocusable(false);
@@ -113,8 +131,6 @@ public class GUI {
 		setupNodeAndEdgeInfoPanel();
 
 		informationPanel.add(Box.createRigidArea(new Dimension(informationPanel.getWidth(), 800)));
-
-
 		myFrame.getContentPane().add(informationPanel, BorderLayout.EAST);
 	}
 
@@ -179,16 +195,22 @@ public class GUI {
 		edgeInfoPanel.add(new Label(" "));
 		informationPanel.add(edgeInfoPanel);	
 	}
+	
+	private void setupTimestepDropDown(){
+		
+	}
 
 	private void setupActionListeners() {
 		timestepDropdown.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(timestepDropdown.getSelectedItem().toString());
-				graphstateSelected(String.valueOf(timestepDropdown.getSelectedItem()));
-				timeStepSelectionIndex = timestepDropdown.getSelectedIndex();
-
+				System.out.println(counter);
+				//System.out.println(timestepDropdown.getSelectedItem().toString());
+				if (e.getSource() == timestepDropdown && !fuckingleavethecomboboxalone){
+					graphstateSelected(String.valueOf(timestepDropdown.getSelectedItem()));
+					timeStepSelectionIndex = timestepDropdown.getSelectedIndex();
+					counter++;
+				}
 			}
 		});
 
@@ -239,7 +261,6 @@ public class GUI {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("mouse click!");
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					GraphicElement gfxNode = view.findNodeOrSpriteAt(view.getMousePosition().getX(),
 							view.getMousePosition().getY());
@@ -248,8 +269,6 @@ public class GUI {
 						Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 						lblIdentifier.setText(node.getId());
 						lblType.setText(node.getAttribute("ui.class").toString());
-						
-						System.out.println(lblIdentifier.getText());
 						
 						setEdgeInformation(node);
 							
@@ -301,6 +320,28 @@ public class GUI {
 				}
 			}
 		});
+		
+		
+		btnOpenSelectDirectory.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == btnOpenSelectDirectory){
+					int option = fileChooser.showOpenDialog(myFrame);
+					if (option == JFileChooser.APPROVE_OPTION){
+						selectedDirectory = fileChooser.getSelectedFile().getPath();
+						graphLogic.setDirectory(selectedDirectory);
+
+						timeStepSelectionIndex = 0;
+						fuckingleavethecomboboxalone = true;
+						timestepDropdown.setSelectedIndex(timeStepSelectionIndex);
+						fuckingleavethecomboboxalone = false;
+						graphstateSelected(timestepDropdown.getItemAt(timeStepSelectionIndex).toString());
+					}
+				}
+				
+			}
+		});
 	}
 	
 	private void setEdgeInformation(Node node){
@@ -346,6 +387,7 @@ public class GUI {
 	}
 
 	private void graphstateSelected(String filename) {
+		System.out.println("grawphstateselected");
 		graphLogic.loadGraph(filename);
 		setupGraphStreamView();
 	}
@@ -356,7 +398,7 @@ public class GUI {
 		myFrame.repaint();
 		
 		viewer = new Viewer(graphLogic.getGraph(), Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-		viewer.enableAutoLayout();
+		viewer.enableAutoLayout(); //TODO: This creates new threads which are never removed.	
 		view = viewer.addDefaultView(false);
 
 		myFrame.setLayout(new BorderLayout(5, 0));
@@ -366,6 +408,8 @@ public class GUI {
 		myFrame.add(informationPanel, BorderLayout.EAST);
 		setupActionListeners();
 		myFrame.setVisible(true);
+		
+		//viewer.close(); //TODO: returns null for some reasons but does kill the threads.
 	}
 
 	public static void main(String[] args) {
