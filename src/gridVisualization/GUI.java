@@ -81,8 +81,6 @@ public class GUI {
 	
 	private boolean fuckingleavethecomboboxalone = false;
 	boolean viewerInit = false;
-	
-	private int counter = 0;
 
 	public GUI(GraphLogic graphLogic) {
 		System.out.println("gui construct");
@@ -199,12 +197,10 @@ public class GUI {
 		timestepDropdown.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(counter);
 				//System.out.println(timestepDropdown.getSelectedItem().toString());
 				if (e.getSource() == timestepDropdown && !fuckingleavethecomboboxalone){
 					graphstateSelected(String.valueOf(timestepDropdown.getSelectedItem()));
 					timeStepSelectionIndex = timestepDropdown.getSelectedIndex();
-					counter++;
 				}
 			}
 		});
@@ -388,14 +384,11 @@ public class GUI {
 	}
 
 	private void graphstateSelected(String filename) {
-		System.out.println("grawphstateselected");
 		graphLogic.loadGraph(filename);
 		setupGraphStreamView();
 	}
 
 	private void setupGraphStreamView() {
-		System.out.println("setupGraphStreamView");
-
 		if(viewerInit){
 			myFrame.remove(view);
 			myFrame.revalidate();
