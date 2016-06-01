@@ -115,7 +115,7 @@ public class GraphLogic {
 	    graph.addAttribute("ui.quality");
 	    graph.addAttribute("ui.antialias");
 
-        String file = directory+"\\"+filename;
+        String file = directory+"/"+filename;
         try {
 			FileSource fileSource = FileSourceFactory.sourceFor(file);
 
