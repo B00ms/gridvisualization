@@ -56,8 +56,17 @@ public class GraphLogic {
 					 node.addAttribute("ui.style", "shadow-color:red;");
 				 else
 					 node.addAttribute("ui.style", "shadow-color:#339900;");
+
+			 } else if (node.getAttribute("ui.class").equals("Consumer")){
+				 double load = Double.parseDouble(node.getAttribute("load"));
+				 double flow = Double.parseDouble(node.getAttribute("flow"));
+
+				 if (Math.round(load)> Math.round(flow))
+					 node.addAttribute("ui.style", "shadow-color:red;");
+				 else
+					 node.addAttribute("ui.style", "shadow-color:#339900;");
+			 	}
 			 }
-		 }
 		 return graph;
 	}
 
@@ -130,7 +139,7 @@ public class GraphLogic {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setDirectory(String directory){
 		this.directory = directory;
 	}

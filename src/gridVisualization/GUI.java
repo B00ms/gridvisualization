@@ -74,11 +74,11 @@ public class GUI {
 	private Label lblMinimumCharge = new Label();
 	private Label lblChargeEfficiency = new Label();
 	private Label lblDischargeEfficiency = new Label();
-	
+
 	private JFileChooser fileChooser = new JFileChooser();
 	JButton btnOpenSelectDirectory = new JButton("Select directory");
 	private String selectedDirectory = "";
-	
+
 	private boolean fuckingleavethecomboboxalone = false;
 	boolean viewerInit = false;
 
@@ -113,9 +113,9 @@ public class GUI {
 
 		NaturalOrderComparator comparator = new NaturalOrderComparator();
 		Arrays.sort(fileNames, comparator);
-		
+
 		informationPanel.add(btnOpenSelectDirectory);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		fileChooser.setCurrentDirectory(new File("./"));
 
 		timestepDropdown = new JComboBox<String>(fileNames);
@@ -187,12 +187,12 @@ public class GUI {
 		edgeInfoPanel = new JPanel(new GridLayout(3, 2));
 		edgeInfoPanel.setLayout(new BoxLayout(edgeInfoPanel, BoxLayout.Y_AXIS));
 		edgeInfoPanel.setBorder(BorderFactory.createTitledBorder("Edge information"));
-		
+
 		edgeInfoPanel.setVisible(true);
 		edgeInfoPanel.add(new Label(" "));
-		informationPanel.add(edgeInfoPanel);	
+		informationPanel.add(edgeInfoPanel);
 	}
-	
+
 	private void setupInfoPanelActionListeners(){
 		timestepDropdown.addActionListener(new ActionListener() {
 			@Override
@@ -204,9 +204,9 @@ public class GUI {
 				}
 			}
 		});
-		
+
 		btnOpenSelectDirectory.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == btnOpenSelectDirectory){
@@ -222,11 +222,11 @@ public class GUI {
 						graphstateSelected(timestepDropdown.getItemAt(timeStepSelectionIndex).toString());
 					}
 				}
-				
+
 			}
 		});
 	}
-	
+
 	private void setupActionListeners() {
 
 
@@ -280,14 +280,14 @@ public class GUI {
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					GraphicElement gfxNode = view.findNodeOrSpriteAt(view.getMousePosition().getX(),
 							view.getMousePosition().getY());
-					
+
 					if (gfxNode != null && gfxNode.getSelectorType().equals(Selector.Type.NODE)) {
 						Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 						lblIdentifier.setText(node.getId());
 						lblType.setText(node.getAttribute("ui.class").toString());
-						
+
 						setEdgeInformation(node);
-							
+
 						switch (lblType.getText()) {
 						case "ConventionalGenerator":
 						case "RewGenerator":
@@ -297,7 +297,7 @@ public class GUI {
 							lblMinimumProduction.setText(node.getAttribute("minProduction").toString());
 							if (lblType.getText().equals("RewGenerator"))
 								lblFailure.setText("N/A");
-							else 
+							else
 								lblFailure.setText(node.getAttribute("failure").toString());
 							convAndRewGenerationInfoPanel.setVisible(true);
 							storageInfoPanel.setVisible(false);
@@ -311,7 +311,7 @@ public class GUI {
 							break;
 						case "Consumer":
 							lblLoad.setText(node.getAttribute("load").toString());
-							
+
 							convAndRewGenerationInfoPanel.setVisible(false);
 							storageInfoPanel.setVisible(false);
 							consumerInfoPanel.setVisible(true);
@@ -322,13 +322,13 @@ public class GUI {
 							lblMinimumCharge.setText(node.getAttribute("minCharge").toString());
 							lblChargeEfficiency.setText(node.getAttribute("chargeEfficiency").toString());
 							lblDischargeEfficiency.setText(node.getAttribute("dischargeEfficiency").toString());
-							
+
 							convAndRewGenerationInfoPanel.setVisible(false);
 							storageInfoPanel.setVisible(true);
 							consumerInfoPanel.setVisible(false);
 							break;
 						}
-					} 
+					}
 				} else if (SwingUtilities.isRightMouseButton(e)) {
 					Point3 graphUnitsPoint = view.getCamera().transformPxToGu(view.getMousePosition().getX(),
 							view.getMousePosition().getY());
@@ -336,32 +336,32 @@ public class GUI {
 				}
 			}
 		});
-		
-		
+
+
 
 	}
-	
+
 	private void setEdgeInformation(Node node){
 		Iterator<Edge> it = node.getEdgeSet().iterator();
 		edgeInfoPanel.removeAll();
 		edgeInfoPanel.revalidate();
 		edgeInfoPanel.repaint();
-		
+
 		while (it.hasNext()){
 			Edge edge = it.next();
 			JPanel edgePanel = new JPanel();
 			edgePanel.setLayout(new GridLayout(3, 2));
 			edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-					"<"+edge.getNode1().getId()+">---<"+edge.getNode0().getId()+">"));
-			
+					"<"+edge.getNode0().getId()+">---<"+edge.getNode1().getId()+">"));
+
 			Label lblFlow = new Label();
 			Label lblCapacity = new Label();
 			Label lblReactance = new Label();
-			
+
 			lblFlow.setText(edge.getAttribute("flow"));
 			lblCapacity.setText(edge.getAttribute("capacity"));
 			lblReactance.setText(edge.getAttribute("reactance"));
-			
+
 			edgePanel.add(new Label("Flow: "));
 			edgePanel.add(lblFlow);
 			edgePanel.add(new Label("Capacity: "));
@@ -369,7 +369,7 @@ public class GUI {
 			edgePanel.add(new Label("Reactance: "));
 			edgePanel.add(lblReactance);
 			edgePanel.setVisible(true);
-			
+
 			edgeInfoPanel.add(edgePanel);
 		}
 		edgeInfoPanel.repaint();
@@ -395,9 +395,9 @@ public class GUI {
 			myFrame.repaint();
 			viewer.close();
 		}
-		
+
 		viewer = new Viewer(graphLogic.getGraph(), Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-		viewer.enableAutoLayout(); //TODO: This creates new threads which are never removed.	
+		viewer.enableAutoLayout(); //TODO: This creates new threads which are never removed.
 		view = viewer.addDefaultView(false);
 
 		myFrame.setLayout(new BorderLayout(5, 0));
