@@ -346,19 +346,45 @@ public class GUI {
 		edgeInfoPanel.removeAll();
 		edgeInfoPanel.revalidate();
 		edgeInfoPanel.repaint();
+		String nodeId = node.getId();
 
 		while (it.hasNext()){
 			Edge edge = it.next();
 			JPanel edgePanel = new JPanel();
 			edgePanel.setLayout(new GridLayout(3, 2));
-			edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+			if( edge.getNode0().getId().equals(nodeId)){
+				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
 					"<"+edge.getNode0().getId()+">---<"+edge.getNode1().getId()+">"));
+			} else {
+				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+					"<"+edge.getNode1().getId()+">---<"+edge.getNode0().getId()+">"));
+			}
 
 			Label lblFlow = new Label();
 			Label lblCapacity = new Label();
 			Label lblReactance = new Label();
-
-			lblFlow.setText(edge.getAttribute("flow"));
+			
+			if(node.getAttribute("ui.class").equals("Consumer")){
+				double flow = Double.parseDouble(edge.getAttribute("flow"));
+				if (flow > 0)
+					flow = flow * -1;
+				lblFlow.setText(String.valueOf(flow));
+			}else if (node.getAttribute("ui.class").equals("Storage")){
+				double flow = Double.parseDouble(edge.getAttribute("flow"));
+				if (node.getAttribute("status").equals("charging")){
+					if (flow > 0)
+						flow = flow * -1;
+				} else if (node.getAttribute("status").equals("discharging")){
+					 flow = Double.parseDouble(edge.getAttribute("flow"));
+					if (flow < 0)
+						flow = Math.abs(flow);
+					lblFlow.setText(String.valueOf(flow));
+				} else {	
+					lblFlow.setText(String.valueOf(flow));
+				}
+			}else
+				lblFlow.setText(edge.getAttribute("flow"));
+			
 			lblCapacity.setText(edge.getAttribute("capacity"));
 			lblReactance.setText(edge.getAttribute("reactance"));
 
