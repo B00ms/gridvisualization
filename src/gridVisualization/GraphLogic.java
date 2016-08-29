@@ -117,6 +117,10 @@ public class GraphLogic {
 	public Graph getGraph(){
 		return graph;
 	}
+	
+	public void setGraph(Graph graph){
+		this.graph = graph;
+	}
 
 	public void loadGraph(String filename){
 		System.out.println("new graph selected");
