@@ -6,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -37,6 +39,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FileChooserUI;
 
+import org.bouncycastle.asn1.cms.Time;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -106,6 +109,14 @@ public class GUI {
 			
 	private boolean fuckingleavethecomboboxalone = false;
 	boolean viewerInit = false;
+	
+	public enum KEY_DOWN {NONE, DELETE, ADD, ADD_EDGE};
+	private KEY_DOWN keydown;
+	
+	//Keeps tracks of the number of outer, inner and edges found in the network file that the users selects.
+	//Need these numbers when generating graphs.
+	int numOuterNodes, numInnerNodes, numOfEdges = 0;
+	String nodeOne = "";
 
 	public GUI(GraphLogic graphLogic) {
 		System.out.println("gui construct");
@@ -276,7 +287,7 @@ public class GUI {
 		btnsmallWorld.addActionListener(new ActionListener() {		
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Graph graph = graphGenerator.generateRadialGraph();
+				Graph graph = graphGenerator.createModifiedWattsStrogatz(numOuterNodes, numInnerNodes, numOfEdges);
 				graphLogic.setGraph(graph);
 				setupGraphStreamView();
 			}
@@ -294,13 +305,13 @@ public class GUI {
 						HashMap<Integer, List<String>> nodeMap =  parser.parseNodeList(selectedFile);
 						
 						Iterator<Integer> it = nodeMap.keySet().iterator();
-						
 						while(it.hasNext()){
 							int key = it.next();
 							ArrayList<String> node = (ArrayList<String>)nodeMap.get(key);
 							//String nodeAttributes = Integer.toString(key);
 							String nodeAttributes = "";
 							for(String value : node){
+								calculateNumberOfNodes(value);
 								if(!(nodeAttributes.equals("")))
 									nodeAttributes = nodeAttributes + " " + value;
 								else
@@ -316,8 +327,19 @@ public class GUI {
 			}
 		});
 	}
+	
+	private void calculateNumberOfNodes(String value){
+		
+		if (value.equals("CG") || value.equals("C") || value.equals("RG") || value.equals("Storage")){
+			numOuterNodes++;
+		} else if(value.equals("IN"))
+			numInnerNodes++;
+		else if(value.equals("AE"))
+			numOfEdges++;
+	}
 
 	private void setupActionListeners() {
+		
 		view.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -335,6 +357,40 @@ public class GUI {
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
+			}
+		});
+		
+		view.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				keydown = KEY_DOWN.NONE;		
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+				switch(e.getKeyChar()){
+				case 'd':
+					keydown = KEY_DOWN.DELETE;
+					break;
+				case 'a':
+					System.out.println("aa");
+					keydown = KEY_DOWN.ADD;
+				case 'e':
+					keydown = KEY_DOWN.ADD_EDGE;
+					break;
+					default:
+						keydown = KEY_DOWN.NONE;
+				}
 			}
 		});
 
@@ -361,7 +417,8 @@ public class GUI {
 			public void mouseEntered(MouseEvent e) {
 				// TODO Auto-generated method stub
 
-			}	
+			}
+			
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -376,7 +433,7 @@ public class GUI {
 							lblType.setText(node.getAttribute("ui.class").toString());
 	
 							setEdgeInformation(node);
-	
+					
 							switch (lblType.getText()) {
 							case "ConventionalGenerator":
 							case "RewGenerator":
@@ -418,14 +475,39 @@ public class GUI {
 								break;
 							}
 						} else if(viewMode == VIEW_MODE.GRAPH_GENERATION){
-							Node node = graphLogic.getGraph().getNode(gfxNode.getId());
-							String attributes = nodeList.getModel().getElementAt(0);
-							String[] attributesArray = attributes.split("\\s");
-							
-							node = setAttributes(node, attributesArray);
-							System.out.println("read");
-							listModel.remove(0);
-							
+							System.out.println(keydown);
+							if(keydown == KEY_DOWN.DELETE){
+								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
+								graphLogic.getGraph().removeNode(node);
+							} else if(keydown == KEY_DOWN.ADD){
+								String id = String.valueOf(System.currentTimeMillis());
+								graphLogic.getGraph().addNode(id);
+								Node newNode = graphLogic.getGraph().getNode(id);
+								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
+								
+								id = String.valueOf(System.currentTimeMillis());
+								graphLogic.getGraph().addEdge(id, node, newNode);
+							}else if(keydown == KEY_DOWN.ADD_EDGE){
+								if(nodeOne.isEmpty())
+									nodeOne =  gfxNode.getId();
+								else{
+									System.out.println(nodeOne);
+									String nodeTwo =  gfxNode.getId();
+									System.out.println(nodeTwo);
+									String id = String.valueOf(System.currentTimeMillis());
+									graphLogic.getGraph().addEdge(id, nodeOne, nodeTwo);
+									nodeOne = "";
+								}	
+							}else{
+								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
+								String attributes = nodeList.getModel().getElementAt(0);
+								String[] attributesArray = attributes.split("\\s");
+								node = setAttributes(node, attributesArray);
+								System.out.println("read " + node.getAttributeKeySet().toString());
+								System.out.println(graphLogic.getGraph().getNode(gfxNode.getId()).getAttributeKeySet().toString());
+								System.out.println(graphLogic.getGraph().getNode(gfxNode.getId()).getAttribute("ui.class").toString());
+								listModel.remove(0);
+							}
 						}
 					}
 				} else if (SwingUtilities.isRightMouseButton(e)) {
@@ -438,12 +520,13 @@ public class GUI {
 	}
 	
 	private Node setAttributes(Node node, String[] attributes){
-		
 		String nodeType = attributes[0];
+		//node.addAttribute("ui.style", "fill-color: rgb(0,100,255);");
+		
 		switch(nodeType){
 			case "CG":
 				System.out.println("cg");
-				//conv gen
+				//conv gen				
 				node.addAttribute("ui.class", "ConventionalGenerator"); 
 				node.addAttribute("subType", attributes[1]); //node subtype
 			
@@ -485,9 +568,9 @@ public class GUI {
 				node.addAttribute("chMax", attributes[5]);
 			break;
 		}
-		node.addAttribute("ui.style", "shadow-color:red;");
-		node.addAttribute("nodeId", 123);
-		System.out.println(node.getAttributeKeySet().toString());
+		//node.addAttribute("ui.style", "shadow-color:red;");
+		//node.addAttribute("nodeId", 123);
+		//System.out.println(node.getAttributeKeySet().toString());
 		return node;
 	}
 
