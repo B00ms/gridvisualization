@@ -12,9 +12,11 @@ import org.apache.commons.csv.CSVRecord;
 
 public class NodeListParser {
 
-	public HashMap<Integer, List<String>> parseNodeList(String selectedFile) {
+	public List<HashMap<Integer, List<String>>> parseNodeList(String selectedFile) {
 		
+		List<HashMap<Integer, List<String>>> attributes = new ArrayList<HashMap<Integer, List<String>>>();
 		HashMap<Integer, List<String>> nodeMap = new HashMap<>();
+		HashMap<Integer, List<String>> edgeMap = new HashMap<>();
 		Reader reader;
 		Iterable<CSVRecord> records = null;
 		try {
@@ -26,6 +28,7 @@ public class NodeListParser {
 		
 		for(CSVRecord record : records){
 			ArrayList<String> nodeAttributes = new ArrayList<>();
+			ArrayList<String> edgeAttributes = new ArrayList<>();
 			
 			String text = record.get(0);
 			if(text.contains("#")) //Skip comments
@@ -48,6 +51,10 @@ public class NodeListParser {
 			String minSoC;
 			String chMax;
 			
+			String reactance;
+			String capacity;
+			String edgeId;
+			
 			switch(nodeType){
 			case "CG":
 				nodeSubType = record.get(1);
@@ -61,6 +68,7 @@ public class NodeListParser {
 				nodeAttributes.add(lowerGenLimit);
 				nodeAttributes.add(upperGenLimit);
 				nodeAttributes.add(costCoefficient);
+				nodeMap.put(Integer.parseInt(nodeId), nodeAttributes);
 				break;
 			case "C":
 				nodeId = record.get(1);
@@ -68,11 +76,13 @@ public class NodeListParser {
 				
 				nodeAttributes.add(nodeId);
 				nodeAttributes.add(consumptionPercent);
+				nodeMap.put(Integer.parseInt(nodeId), nodeAttributes);
 				break;
 				
 			case "IN":
 				nodeId = record.get(1);
 				nodeAttributes.add(nodeId);
+				nodeMap.put(Integer.parseInt(nodeId), nodeAttributes);
 				break;
 				
 			case "RG":
@@ -87,6 +97,7 @@ public class NodeListParser {
 				nodeAttributes.add(upperGenLimit);
 				nodeAttributes.add(curtailmentCost);
 				nodeAttributes.add(costCoefficient);
+				nodeMap.put(Integer.parseInt(nodeId), nodeAttributes);
 				break;
 			case "Storage":
 				nodeId = record.get(1);
@@ -100,13 +111,26 @@ public class NodeListParser {
 				nodeAttributes.add(maxSoC);
 				nodeAttributes.add(minSoC);
 				nodeAttributes.add(chMax);
+				nodeMap.put(Integer.parseInt(nodeId), nodeAttributes);
+				break;
+			case "AE":
+				edgeId = record.get(1);
+				reactance = record.get(3);
+				capacity = record.get(4);
+				
+				edgeAttributes.add(edgeId);
+				edgeAttributes.add(reactance);
+				edgeAttributes.add(capacity);
+				edgeMap.put(Integer.parseInt(edgeId), edgeAttributes);
 				break;
 			}
-			System.out.println(nodeAttributes);
-			nodeMap.put(Integer.parseInt(nodeId), nodeAttributes);
+			edgeAttributes = new ArrayList<String>(); 
 			nodeAttributes = new ArrayList<String>();
 		}
-		return nodeMap;
+		
+		attributes.add(nodeMap);
+		attributes.add(edgeMap);
+		return attributes;
 	}
 
 }

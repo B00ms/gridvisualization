@@ -1,8 +1,13 @@
 package gridVisualization;
 
 import java.awt.BorderLayout;
+import java.awt.ComponentOrientation;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SpringLayout.Constraints;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FileChooserUI;
@@ -71,7 +77,7 @@ public class GUI {
 	private JPanel storageInfoPanel;
 	private JPanel consumerInfoPanel;
 	private JPanel edgeInfoPanel;
-	private JPanel generationPanel;
+	private Container generationPanel;
 
 	// For all nodes
 	private Label lblIdentifier = new Label();
@@ -106,7 +112,13 @@ public class GUI {
 	private JButton btnLoadNodeList = new JButton("Load Node List");
 	private JFileChooser nodeListChooser = new JFileChooser();
 	private JButton btnSaveGraph = new JButton("Save Graph");
-			
+	private JButton btnAssignEdges = new JButton("Assign Edges Nodes");
+	private JButton btnAssignNodes= new JButton("Assign Nodes");
+	
+	private DefaultListModel<String> listModelEdges = new DefaultListModel<String>();
+	private JScrollPane scllPaneEdges = new JScrollPane();
+	private JList<String> edgesList = new JList<String>();		
+	
 	private boolean fuckingleavethecomboboxalone = false;
 	boolean viewerInit = false;
 	
@@ -238,12 +250,66 @@ public class GUI {
 		edgeInfoPanel.add(new Label(" "));
 		informationPanel.add(edgeInfoPanel);
 	
-		generationPanel = new JPanel(new GridLayout(2, 2));
+		generationPanel = new JPanel(new GridBagLayout());
+		generationPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		generationPanel.setVisible(true);
-		generationPanel.add(btnsmallWorld);
-		generationPanel.add(scllPaneNodes);
-		generationPanel.add(btnLoadNodeList);
-		generationPanel.add(btnSaveGraph);
+		
+		GridBagConstraints constr = new GridBagConstraints();
+			
+		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.gridx = 0;
+		constr.gridy = 0;
+		constr.insets = new Insets(0, 2, 2, 2);
+		generationPanel.add(btnsmallWorld, constr);
+		
+		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.weightx = 0.5;
+		constr.gridx = 1;
+		constr.gridy = 0;
+		constr.insets = new Insets(0, 2, 2, 2);
+		generationPanel.add(btnLoadNodeList, constr);
+			
+		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.weightx = 0.0;
+		constr.gridx = 0;
+		constr.gridy = 1;
+		generationPanel.add(btnAssignNodes, constr);
+		
+		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.weightx = 0.0;
+		constr.gridx = 1;
+		constr.gridy = 1;
+		constr.insets = new Insets(2, 2, 2, 2);
+		generationPanel.add(btnAssignEdges, constr);
+		
+		constr.fill = GridBagConstraints.BOTH;
+		constr.weightx = 1.0;
+		constr.weighty = 1.0;  
+		constr.gridx = 0;
+		constr.gridy = 2;
+		constr.gridwidth = 1;
+		constr.anchor = GridBagConstraints.PAGE_END;
+		generationPanel.add(scllPaneNodes, constr);
+
+		constr.fill = GridBagConstraints.BOTH;
+		constr.weightx = 1.0;
+		constr.weighty = 1.0;  
+		constr.gridx = 1;
+		constr.gridy = 2;
+		constr.gridwidth = 1;
+		constr.anchor = GridBagConstraints.PAGE_END;
+		generationPanel.add(scllPaneEdges, constr);
+		
+		constr.fill = GridBagConstraints.HORIZONTAL;
+		constr.ipady = 0;       //reset to default
+		constr.weighty = 0.05;   //request any extra vertical space
+		constr.anchor = GridBagConstraints.PAGE_END; //bottom of space
+		constr.insets = new Insets(2,2,2,2);  //top padding
+		constr.gridx = 0;       //aligned with button 2
+		constr.gridwidth = 3;   //2 columns wide
+		constr.gridy = 3;       //third row
+		generationPanel.add(btnSaveGraph, constr);
+
 		informationPanel.add(generationPanel);
 		
 		tabbedPane.addTab("Inspection", informationPanel);
@@ -251,6 +317,15 @@ public class GUI {
 	}
 
 	private void setupInfoPanelActionListeners(){
+		
+		btnAssignNodes.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				graphLogic.assignNodes(numOuterNodes+numInnerNodes, listModel);
+			}
+		});
+		
 		timestepDropdown.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -298,12 +373,16 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == btnLoadNodeList){
+					listModel.removeAllElements();
+					nodeList.removeAll();
+					edgesList.removeAll();
 					int option = nodeListChooser.showOpenDialog(myFrame);
 					if(option == nodeListChooser.APPROVE_OPTION){
 						String selectedFile = nodeListChooser.getSelectedFile().getPath();
 						NodeListParser parser = new NodeListParser();
-						HashMap<Integer, List<String>> nodeMap =  parser.parseNodeList(selectedFile);
+						List<HashMap<Integer, List<String>>> attributes =  parser.parseNodeList(selectedFile);
 						
+						HashMap<Integer, List<String>> nodeMap = attributes.get(0);
 						Iterator<Integer> it = nodeMap.keySet().iterator();
 						while(it.hasNext()){
 							int key = it.next();
@@ -311,7 +390,7 @@ public class GUI {
 							//String nodeAttributes = Integer.toString(key);
 							String nodeAttributes = "";
 							for(String value : node){
-								calculateNumberOfNodes(value);
+								calculateNumberOfNodesAndEdges(value);
 								if(!(nodeAttributes.equals("")))
 									nodeAttributes = nodeAttributes + " " + value;
 								else
@@ -319,22 +398,42 @@ public class GUI {
 							}
 							listModel.addElement(nodeAttributes);
 							nodeList.setModel(listModel);
+							edgesList.setModel(listModelEdges);
 							scllPaneNodes.setViewportView(nodeList);
+							scllPaneEdges.setViewportView(edgesList);
+						}
+						HashMap<Integer, List<String>> edgeMap = attributes.get(1);
+						Iterator<Integer> itEdge = edgeMap.keySet().iterator();
+
+						while(itEdge.hasNext()){
+							int key = itEdge.next();
+							ArrayList<String> node = (ArrayList<String>)edgeMap.get(key);
+							//String nodeAttributes = Integer.toString(key);
+							String edgeAttributes = "";
+							for(String value : node){
+								calculateNumberOfNodesAndEdges(value);
+								if(!(edgeAttributes.equals("")))
+									edgeAttributes = edgeAttributes + " " + value;
+								else
+									edgeAttributes += value;
+							}
+							listModelEdges.addElement(edgeAttributes);
+							edgesList.setModel(listModelEdges);
+							scllPaneEdges.setViewportView(edgesList);
 						}
 					}
 				}
-				
+				System.out.println(numInnerNodes+numOuterNodes);
 			}
 		});
+		
 	}
 	
-	private void calculateNumberOfNodes(String value){
+	private void calculateNumberOfNodesAndEdges(String value){
 		
-		if (value.equals("CG") || value.equals("C") || value.equals("RG") || value.equals("Storage")){
-			numOuterNodes++;
-		} else if(value.equals("IN"))
-			numInnerNodes++;
-		else if(value.equals("AE"))
+		if (value.equals("CG") || value.equals("C") || value.equals("RG") || value.equals("Storage") || value.equals("IN")){
+			numOuterNodes++;	
+		}else if(value.equals("AE"))
 			numOfEdges++;
 	}
 
@@ -383,13 +482,14 @@ public class GUI {
 					keydown = KEY_DOWN.DELETE;
 					break;
 				case 'a':
-					System.out.println("aa");
 					keydown = KEY_DOWN.ADD;
+					break;
 				case 'e':
 					keydown = KEY_DOWN.ADD_EDGE;
 					break;
 					default:
 						keydown = KEY_DOWN.NONE;
+						break;
 				}
 			}
 		});
@@ -482,9 +582,8 @@ public class GUI {
 							} else if(keydown == KEY_DOWN.ADD){
 								String id = String.valueOf(System.currentTimeMillis());
 								graphLogic.getGraph().addNode(id);
-								Node newNode = graphLogic.getGraph().getNode(id);
+								Node newNode = graphLogic.getGraph().getNode(id);								
 								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
-								
 								id = String.valueOf(System.currentTimeMillis());
 								graphLogic.getGraph().addEdge(id, node, newNode);
 							}else if(keydown == KEY_DOWN.ADD_EDGE){

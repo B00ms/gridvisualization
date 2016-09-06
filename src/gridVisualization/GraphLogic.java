@@ -1,6 +1,12 @@
 package gridVisualization;
 
 import java.io.IOException;
+import java.util.Iterator;
+
+import javax.swing.DefaultListModel;
+import javax.swing.ListModel;
+
+import org.apache.commons.math3.ml.neuralnet.sofm.NeighbourhoodSizeFunction;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -11,6 +17,9 @@ import org.graphstream.ui.swingViewer.DefaultView;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
+import org.w3c.dom.NodeList;
+
+import scala.util.Random;
 
 
 public class GraphLogic {
@@ -147,4 +156,82 @@ public class GraphLogic {
 	public void setDirectory(String directory){
 		this.directory = directory;
 	}
+	
+	public void assignNodes(int nOuterNodes, DefaultListModel<String> nodeListModel){
+		
+		Iterator<Node> it = graph.getNodeIterator();
+		int nodeCounter = 0;
+		Random rnd = new Random();
+		
+		while(it.hasNext()){
+			Node node = it.next();
+			
+			if(node.getEdgeSet().size() >= 2 ){
+				assignInnerNodes(node, nodeListModel);
+			}else{
+				int index = rnd.nextInt(nOuterNodes-1);
+				String nodeAttr = nodeListModel.getElementAt(index);
+				String[] arrayAttr = nodeAttr.split("\\s");
+				System.out.println(nodeAttr);
+				nodeListModel.remove(index);
+				switch (arrayAttr[0]) {
+				case "CG":
+					node.addAttribute("ui.class", "ConventionalGenerator"); 
+					node.addAttribute("subType", arrayAttr[1]); //node subtype
+					node.addAttribute("nodeId", arrayAttr[2]);
+				
+					node.addAttribute("lowerGenLimit", arrayAttr[2]); //lower gen limit
+					node.addAttribute("upperGenLimit", arrayAttr[3]);
+					node.addAttribute("costCoefficient", arrayAttr[4]);
+					break;
+				case "C":
+					node.addAttribute("ui.class", "Consumer"); 
+					node.addAttribute("nodeId", arrayAttr[1]);
+					node.addAttribute("consumptionPercentage", arrayAttr[2]);
+					break;
+				case "RG":
+					//renewable gen
+					node.addAttribute("ui.class", "RewGenerator"); 
+					node.addAttribute("subType", arrayAttr[1]); //node subtype
+					node.addAttribute("nodeId", arrayAttr[2]);
+					node.addAttribute("maxGen", arrayAttr[3]);
+					node.addAttribute("cuirtailmentCost", arrayAttr[4]);
+					node.addAttribute("costCoefficient", arrayAttr[5]);
+					break;
+				case "Storage":
+					node.addAttribute("ui.class", "Storage"); 
+					node.addAttribute("nodeId", arrayAttr[1]);
+					node.addAttribute("currentSoC", arrayAttr[2]);
+					node.addAttribute("maxSoC", arrayAttr[3]);
+					node.addAttribute("minSoC", arrayAttr[4]);
+					node.addAttribute("chMax", arrayAttr[5]);
+					break;
+				default:
+					break;
+				}
+			}
+			nodeCounter++;
+		}
+	}
+	
+	private void assignInnerNodes(Node node, DefaultListModel<String> nodeListModel){
+		String nodeAttr = "";
+		Random rnd = new Random();
+		int index =  1;
+		while(!nodeAttr.contains("IN")){
+			nodeAttr = nodeListModel.getElementAt(index-1);
+			index++;
+		}
+		
+		nodeListModel.remove(index-1);
+		String[] arrayAttr = nodeAttr.split("\\s");
+		
+		node.addAttribute("ui.class", "InnerNode");
+		node.addAttribute("nodeId", arrayAttr[1]);
+	}
+	
+	private void assignEdges(int nEdges){
+		
+	}
+	
 }
