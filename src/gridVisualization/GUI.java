@@ -68,6 +68,7 @@ public class GUI {
 	private JPanel informationPanel;
 	public enum VIEW_MODE {GRAPH_INSPECTION, GRAPH_GENERATION};
 	VIEW_MODE viewMode = VIEW_MODE.GRAPH_INSPECTION;
+	boolean autoLayoutOn = true;
 	
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
@@ -362,7 +363,7 @@ public class GUI {
 		btnsmallWorld.addActionListener(new ActionListener() {		
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Graph graph = graphGenerator.createModifiedWattsStrogatz(numOuterNodes, numInnerNodes, numOfEdges);
+				Graph graph = graphGenerator.createModifiedWattsStrogatz(numOuterNodes, numInnerNodes, numOfEdges, listModel, listModelEdges);
 				graphLogic.setGraph(graph);
 				setupGraphStreamView();
 			}
@@ -376,18 +377,20 @@ public class GUI {
 					listModel.removeAllElements();
 					nodeList.removeAll();
 					edgesList.removeAll();
+					numOuterNodes = 0;
+					numInnerNodes = 0;
+					numOfEdges = 0;
+					
 					int option = nodeListChooser.showOpenDialog(myFrame);
 					if(option == nodeListChooser.APPROVE_OPTION){
 						String selectedFile = nodeListChooser.getSelectedFile().getPath();
 						NodeListParser parser = new NodeListParser();
-						List<HashMap<Integer, List<String>>> attributes =  parser.parseNodeList(selectedFile);
+						List<List<List<String>>> attributes =  parser.parseNodeList(selectedFile);
 						
-						HashMap<Integer, List<String>> nodeMap = attributes.get(0);
-						Iterator<Integer> it = nodeMap.keySet().iterator();
+						List<List<String>> nodeMap = attributes.get(0);
+						Iterator<List<String>> it = nodeMap.iterator();
 						while(it.hasNext()){
-							int key = it.next();
-							ArrayList<String> node = (ArrayList<String>)nodeMap.get(key);
-							//String nodeAttributes = Integer.toString(key);
+							List<String> node = it.next();
 							String nodeAttributes = "";
 							for(String value : node){
 								calculateNumberOfNodesAndEdges(value);
@@ -402,15 +405,13 @@ public class GUI {
 							scllPaneNodes.setViewportView(nodeList);
 							scllPaneEdges.setViewportView(edgesList);
 						}
-						HashMap<Integer, List<String>> edgeMap = attributes.get(1);
-						Iterator<Integer> itEdge = edgeMap.keySet().iterator();
+						List<List<String>> edgeMap = attributes.get(1);
+						Iterator<List<String>> itEdge = edgeMap.iterator();
 
 						while(itEdge.hasNext()){
-							int key = itEdge.next();
-							ArrayList<String> node = (ArrayList<String>)edgeMap.get(key);
-							//String nodeAttributes = Integer.toString(key);
+							List<String> edge = itEdge.next();
 							String edgeAttributes = "";
-							for(String value : node){
+							for(String value : edge){
 								calculateNumberOfNodesAndEdges(value);
 								if(!(edgeAttributes.equals("")))
 									edgeAttributes = edgeAttributes + " " + value;
@@ -423,7 +424,8 @@ public class GUI {
 						}
 					}
 				}
-				System.out.println(numInnerNodes+numOuterNodes);
+				System.out.println(listModelEdges.size());
+				System.out.println(numInnerNodes + " " + numOuterNodes);
 			}
 		});
 		
@@ -431,8 +433,10 @@ public class GUI {
 	
 	private void calculateNumberOfNodesAndEdges(String value){
 		
-		if (value.equals("CG") || value.equals("C") || value.equals("RG") || value.equals("Storage") || value.equals("IN")){
+		if (value.equals("CG") || value.equals("C") || value.equals("RG") || value.equals("Storage")){
 			numOuterNodes++;	
+		}else if( value.equals("IN")){
+			numInnerNodes++;
 		}else if(value.equals("AE"))
 			numOfEdges++;
 	}
@@ -477,19 +481,29 @@ public class GUI {
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 				
-				switch(e.getKeyChar()){
-				case 'd':
+				switch(e.getKeyCode()){
+				case KeyEvent.VK_D:
 					keydown = KEY_DOWN.DELETE;
 					break;
-				case 'a':
+				case KeyEvent.VK_A:
 					keydown = KEY_DOWN.ADD;
 					break;
-				case 'e':
+				case KeyEvent.VK_E:
 					keydown = KEY_DOWN.ADD_EDGE;
 					break;
-					default:
-						keydown = KEY_DOWN.NONE;
-						break;
+				case KeyEvent.VK_SPACE:
+					if(autoLayoutOn){
+						viewer.disableAutoLayout();
+						autoLayoutOn = false;
+					}else{
+						viewer.enableAutoLayout();
+						autoLayoutOn = true;
+					}
+					break;
+				default:
+					keydown = KEY_DOWN.NONE;
+					break;
+						
 				}
 			}
 		});
@@ -755,7 +769,7 @@ public class GUI {
 		}
 
 		viewer = new Viewer(graphLogic.getGraph(), Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-		viewer.enableAutoLayout(); //TODO: This creates new threads which are never removed.
+		viewer.enableAutoLayout();
 		view = viewer.addDefaultView(false);
 
 		myFrame.setLayout(new BorderLayout(5, 0));
