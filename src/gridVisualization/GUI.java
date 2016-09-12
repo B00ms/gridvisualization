@@ -21,10 +21,12 @@ import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -123,7 +125,7 @@ public class GUI {
 	private boolean fuckingleavethecomboboxalone = false;
 	boolean viewerInit = false;
 	
-	public enum KEY_DOWN {NONE, DELETE, ADD, ADD_EDGE};
+	public enum KEY_DOWN {NONE, DELETE, ADD, ADD_EDGE, SHIFT};
 	private KEY_DOWN keydown;
 	
 	//Keeps tracks of the number of outer, inner and edges found in the network file that the users selects.
@@ -319,6 +321,16 @@ public class GUI {
 
 	private void setupInfoPanelActionListeners(){
 		
+		btnSaveGraph.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				graphLogic.saveGraph();
+				
+			}
+		});
+		
 		btnAssignNodes.addActionListener(new ActionListener() {
 			
 			@Override
@@ -500,6 +512,9 @@ public class GUI {
 						autoLayoutOn = true;
 					}
 					break;
+				case KeyEvent.VK_SHIFT:
+					keydown = KEY_DOWN.SHIFT;
+					break;
 				default:
 					keydown = KEY_DOWN.NONE;
 					break;
@@ -592,14 +607,15 @@ public class GUI {
 							System.out.println(keydown);
 							if(keydown == KEY_DOWN.DELETE){
 								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
+								addEdgeToList(node.getEdgeSet());
 								graphLogic.getGraph().removeNode(node);
+								addToNodeList(node);
 							} else if(keydown == KEY_DOWN.ADD){
 								String id = String.valueOf(System.currentTimeMillis());
-								graphLogic.getGraph().addNode(id);
-								Node newNode = graphLogic.getGraph().getNode(id);								
-								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
-								id = String.valueOf(System.currentTimeMillis());
-								graphLogic.getGraph().addEdge(id, node, newNode);
+								graphLogic.addNode(gfxNode, nodeList, edgesList);							
+								//Node node = graphLogic.getGraph().getNode(gfxNode.getId());
+								//id = UUID.randomUUID().toString();
+								//graphLogic.getGraph().addEdge(id, node, newNode);
 							}else if(keydown == KEY_DOWN.ADD_EDGE){
 								if(nodeOne.isEmpty())
 									nodeOne =  gfxNode.getId();
@@ -607,19 +623,27 @@ public class GUI {
 									System.out.println(nodeOne);
 									String nodeTwo =  gfxNode.getId();
 									System.out.println(nodeTwo);
-									String id = String.valueOf(System.currentTimeMillis());
-									graphLogic.getGraph().addEdge(id, nodeOne, nodeTwo);
+									String id = String.valueOf(UUID.randomUUID().toString());
+									Edge edge = graphLogic.getGraph().addEdge(id, nodeOne, nodeTwo);
+									String[] attr = ((DefaultListModel<String>)edgesList.getModel()).get(0).split("\\s");
+									edge.setAttribute("edgeID", attr[1]);
+									edge.setAttribute("reactance", attr[2]);
+									edge.setAttribute("capacity", attr[3]);
+									((DefaultListModel<String>)edgesList.getModel()).remove(0);
 									nodeOne = "";
 								}	
-							}else{
-								Node node = graphLogic.getGraph().getNode(gfxNode.getId());
+							}else if(keydown == KEY_DOWN.SHIFT){
+								addToNodeList(graphLogic.getGraph().getNode(gfxNode.getId()));
+							}else{			
+								graphLogic.assignNode(gfxNode, nodeList);
+								/*Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 								String attributes = nodeList.getModel().getElementAt(0);
 								String[] attributesArray = attributes.split("\\s");
-								node = setAttributes(node, attributesArray);
+								node = graphLogic.setAttributes(node, attributesArray);
 								System.out.println("read " + node.getAttributeKeySet().toString());
 								System.out.println(graphLogic.getGraph().getNode(gfxNode.getId()).getAttributeKeySet().toString());
 								System.out.println(graphLogic.getGraph().getNode(gfxNode.getId()).getAttribute("ui.class").toString());
-								listModel.remove(0);
+								listModel.remove(0);*/
 							}
 						}
 					}
@@ -632,61 +656,47 @@ public class GUI {
 		});
 	}
 	
-	private Node setAttributes(Node node, String[] attributes){
-		String nodeType = attributes[0];
-		//node.addAttribute("ui.style", "fill-color: rgb(0,100,255);");
+	private void addToNodeList(Node node){
 		
-		switch(nodeType){
-			case "CG":
-				System.out.println("cg");
-				//conv gen				
-				node.addAttribute("ui.class", "ConventionalGenerator"); 
-				node.addAttribute("subType", attributes[1]); //node subtype
-			
-				node.addAttribute("lowerGenLimit", attributes[2]); //lower gen limit
-				node.addAttribute("upperGenLimit", attributes[3]);
-				node.addAttribute("costCoefficient", attributes[4]);
+		String attr = null;
+		switch (node.getAttribute("ui.class").toString()) {
+		case "ConventionalGenerator":
+			System.out.println("conv");
+			attr = "CG " + node.getAttribute("subType").toString() + " " +
+					node.getId() + " " + node.getAttribute("lowerGenLimit") + " " +
+					node.getAttribute("upperGenLimit") + " " + node.getAttribute("costCoefficient");
 			break;
-			
-			case "C":
-				//consumer
-				node.addAttribute("ui.class", "Consumer"); 
-				node.addAttribute("nodeId", attributes[1]);
-				node.addAttribute("consumptionPercentage", attributes[2]);
+		case "InnerNode":
+			attr = "IN " + node.getId();
 			break;
-			
-			case "IN":
-				//inner node
-				node.addAttribute("ui.class", "InnerNode"); 
-				node.addAttribute("nodeId", attributes[1]);
+		case "Consumer":
+			attr = "C " + node.getId() + " " + node.getAttribute("consumptionPercentage");
 			break;
-			
-			case "RG":
-				//renewable gen
-				node.addAttribute("ui.class", "RewGenerator"); 
-				node.addAttribute("subType", attributes[1]); //node subtype
-				node.addAttribute("nodeId", attributes[2]);
-				node.addAttribute("maxGen", attributes[3]);
-				node.addAttribute("cuirtailmentCost", attributes[4]);
-				node.addAttribute("costCoefficient", attributes[5]);
+		case "RewGenerator":
+			attr = "RG " + node.getAttribute("subType") + " " + node.getId() + " " + node.getAttribute("maxProduction") +
+			" " + node.getAttribute("cuirtailmentCost") + " " + node.getAttribute("costCoefficient");
 			break;
-			
-			case "Storage":
-				//storage
-				node.addAttribute("ui.class", "Storage"); 
-				node.addAttribute("nodeId", attributes[1]);
-				node.addAttribute("currentSoC", attributes[2]);
-				node.addAttribute("maxSoC", attributes[3]);
-				node.addAttribute("minSoC", attributes[4]);
-				node.addAttribute("chMax", attributes[5]);
+		case "Storage":
+			attr = "Storage " + node.getId() + " " + node.getAttribute("currentSoC") + " " + node.getAttribute("maxSoC") + 
+			" " + node.getAttribute("minSoC") +  " " + node.getAttribute("chMax"); 
+			break;
+		default:
 			break;
 		}
-		//node.addAttribute("ui.style", "shadow-color:red;");
-		//node.addAttribute("nodeId", 123);
-		//System.out.println(node.getAttributeKeySet().toString());
-		return node;
+		listModel.add(0, attr);
+		node.clearAttributes();
 	}
-
+	
+	private void addEdgeToList(Collection<Edge> edgeCol){
+		
+		for(Edge edge : edgeCol){
+			String strEdge = "AE " + edge.getAttribute("edgeId") + " " + edge.getAttribute("reactance") + " " + edge.getAttribute("capacity");
+			listModelEdges.add(0, strEdge);
+			edge.clearAttributes();
+		}
+		
+	}
+	
 	private void setEdgeInformation(Node node){
 		Iterator<Edge> it = node.getEdgeSet().iterator();
 		edgeInfoPanel.removeAll();

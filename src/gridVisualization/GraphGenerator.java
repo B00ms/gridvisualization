@@ -34,8 +34,7 @@ public class GraphGenerator {
 		while(graphGenerator.nextEvents()){};
 		graphGenerator.end();
 		
-		setInnerNodes(graph);
-		removeInnerNodesFromList(nodeList);
+		setInnerNodes(graph, nodeList);
 		System.out.println("Node count: " + graph.getNodeCount());
 		setOuterNodes(graph, nodeList);
 		setInnerEdges(graph, edgeList);
@@ -49,21 +48,26 @@ public class GraphGenerator {
 		
 	}
 	
-	public void setInnerNodes(Graph graph){
-		Iterator<Node> iter = graph.getNodeIterator();
-		while(iter.hasNext()){
-			Node node = iter.next();
-			node.addAttribute("ui.class", "InnerNode");
-		}
-	}
-	
-	private void removeInnerNodesFromList(DefaultListModel<String> nodeList){
+	public void setInnerNodes(Graph graph, DefaultListModel<String> nodeList){
 		
+		List<String> innerList = new ArrayList<String>();
 		for(int i=0; i < nodeList.size(); i++){
 			if(nodeList.get(i).contains("IN ")){
+				String[] edgeAttr = nodeList.get(i).split("\\s");
+				innerList.add(edgeAttr[1]);
 				nodeList.remove(i);
 				i=0;
 			}
+		}
+		
+		int innerIndex = 0;
+		Iterator<Node> iter = graph.getNodeIterator();
+		while(iter.hasNext()){
+			Node node = iter.next();
+			node.addAttribute("ui.label", innerList.get(innerIndex));
+			node.addAttribute("nodeId", innerList.get(innerIndex));
+			node.addAttribute("ui.class", "InnerNode");
+			innerIndex++;
 		}
 	}
 	
@@ -76,8 +80,10 @@ public class GraphGenerator {
 			Edge edge = it.next();
 			int randomEdgeIndex = random.nextInt(edgeList.size());
 			String[] edgeAttr = edgeList.get(randomEdgeIndex).split("\\s");
-			edge.addAttribute("reactance", edgeAttr[1]);
-			edge.addAttribute("capacity", edgeAttr[2]);
+			edge.addAttribute("edgeId", edgeAttr[1]);
+			edge.addAttribute("flow", "0");
+			edge.addAttribute("reactance", edgeAttr[2]);
+			edge.addAttribute("capacity", edgeAttr[3]);
 			edgeList.remove(randomEdgeIndex);
 		}
 	}
@@ -87,39 +93,48 @@ public class GraphGenerator {
 		int i = 0;
 		while(nodeList.size() > i){
 			
-			String id = String.valueOf(graph.getNodeCount()+1);
+			String id = String.valueOf(graph.getNodeCount());
 			graph.addNode(id);
 			Node node1 = graph.getNode(id);
-			
 			String[] attr = nodeList.get(i).split("\\s");
 			switch(attr[0]){
 			case "CG":
 				node1.addAttribute("ui.class", "ConventionalGenerator");
 				node1.addAttribute("subType", attr[1]); //node subtype
-			
-				node1.addAttribute("lowerGenLimit", attr[2]); //lower gen limit
-				node1.addAttribute("upperGenLimit", attr[3]);
-				node1.addAttribute("costCoefficient", attr[4]);
+				node1.addAttribute("nodeId", attr[2]);
+				node1.addAttribute("ui.label", attr[2]);
+				node1.addAttribute("lowerGenLimit", attr[3]); //lower gen limit
+				node1.addAttribute("upperGenLimit", attr[4]);
+				node1.addAttribute("costCoefficient", attr[5]);
 				nodeList.remove(i);
 				i = 0;
 				break;
 			case "C":
 				node1.addAttribute("ui.class", "Consumer");
+				node1.addAttribute("nodeId", attr[1]);
+				node1.addAttribute("ui.label", attr[1]);
 				node1.addAttribute("consumptionPercentage", attr[2]);
+				node1.addAttribute("load", "0");
 				nodeList.remove(i);
 				i = 0;
 				break;
 			case "RG":
 				node1.addAttribute("ui.class", "RewGenerator");
 				node1.addAttribute("subType", attr[1]); //node subtype
-				node1.addAttribute("maxGen", attr[3]);
+				node1.addAttribute("nodeId", attr[2]); //node subtype
+				node1.addAttribute("ui.label", attr[2]);
+				node1.addAttribute("maxProduction", attr[3]);
+				node1.addAttribute("minProduction", "0");
 				node1.addAttribute("cuirtailmentCost", attr[4]);
 				node1.addAttribute("costCoefficient", attr[5]);
+				node1.addAttribute("production", "0");
 				nodeList.remove(i);
 				i = 0;
 				break;
 			case "Storage":
 				node1.addAttribute("ui.class", "Storage");
+				node1.addAttribute("nodeId", attr[1]);
+				node1.addAttribute("ui.label", attr[1]);
 				node1.addAttribute("currentSoC", attr[2]);
 				node1.addAttribute("maxSoC", attr[3]);
 				node1.addAttribute("minSoC", attr[4]);
@@ -171,7 +186,7 @@ public class GraphGenerator {
 				minimumCapacity = (Double.valueOf(node1.getAttribute("upperGenLimit").toString()));
 				break;
 			case "RewGenerator":
-				minimumCapacity = (Integer.valueOf(node1.getAttribute("maxGen").toString()));
+				minimumCapacity = (Integer.valueOf(node1.getAttribute("maxProduction").toString()));
 				break;
 			case "Consumer":
 				minimumCapacity = 0;
@@ -181,8 +196,16 @@ public class GraphGenerator {
 			String[] edgeAttr = edgesList.get(i).split("\\s");
 			int capacity = Integer.valueOf(edgeAttr[3]);
 			if(capacity >= minimumCapacity && node1.getId() != node2.getId()){
+				Edge edge = null;
+				if(node1.getAttribute("ui.class").toString().equals("Consumer"))
+					edge = graph.addEdge(String.valueOf(graph.getEdgeCount()+1), node2, node1);
+				else
+					edge = graph.addEdge(String.valueOf(graph.getEdgeCount()+1), node1, node2);
 				
-				graph.addEdge(String.valueOf(graph.getEdgeCount()+1), node1, node2);
+				edge.addAttribute("edgeId", edgeAttr[1]);
+				edge.addAttribute("flow", "0");
+				edge.addAttribute("reactance", edgeAttr[2]);
+				edge.addAttribute("capacity", edgeAttr[3]);
 				edgesList.remove(i);
 				i = 0;
 			}
