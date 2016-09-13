@@ -623,14 +623,16 @@ public class GUI {
 									System.out.println(nodeOne);
 									String nodeTwo =  gfxNode.getId();
 									System.out.println(nodeTwo);
-									String id = String.valueOf(UUID.randomUUID().toString());
-									Edge edge = graphLogic.getGraph().addEdge(id, nodeOne, nodeTwo);
-									String[] attr = ((DefaultListModel<String>)edgesList.getModel()).get(0).split("\\s");
-									edge.setAttribute("edgeID", attr[1]);
-									edge.setAttribute("reactance", attr[2]);
-									edge.setAttribute("capacity", attr[3]);
-									((DefaultListModel<String>)edgesList.getModel()).remove(0);
-									nodeOne = "";
+									if(nodeOne != nodeTwo){
+										String id = String.valueOf(UUID.randomUUID().toString());
+										Edge edge = graphLogic.getGraph().addEdge(id, nodeOne, nodeTwo);
+										String[] attr = ((DefaultListModel<String>)edgesList.getModel()).get(0).split("\\s");
+										edge.setAttribute("edgeID", attr[1]);
+										edge.setAttribute("reactance", attr[2]);
+										edge.setAttribute("capacity", attr[3]);
+										((DefaultListModel<String>)edgesList.getModel()).remove(0);
+											nodeOne = "";
+									}
 								}	
 							}else if(keydown == KEY_DOWN.SHIFT){
 								addToNodeList(graphLogic.getGraph().getNode(gfxNode.getId()));
