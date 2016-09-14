@@ -575,12 +575,12 @@ public class GUI {
 								storageInfoPanel.setVisible(false);
 								consumerInfoPanel.setVisible(false);
 								break;
-							case "RewGenerator":
+							case "RenewableGenerator":
 								lblSubType.setText(node.getAttribute("subType").toString());
 								lblProduction.setText(node.getAttribute("production").toString());
 								lblMaxProduction.setText(node.getAttribute("maxProduction").toString());
 								lblMinimumProduction.setText(node.getAttribute("minProduction").toString());
-								if (lblType.getText().equals("RewGenerator"))
+								if (lblType.getText().equals("RenewableGenerator"))
 									lblFailure.setText("N/A");
 								else
 									lblFailure.setText(node.getAttribute("failure").toString());
@@ -684,7 +684,7 @@ public class GUI {
 		case "Consumer":
 			attr = "C " + node.getId() + " " + node.getAttribute("consumptionPercentage");
 			break;
-		case "RewGenerator":
+		case "RenewableGenerator":
 			attr = "RG " + node.getAttribute("subType") + " " + node.getId() + " " + node.getAttribute("maxProduction") +
 			" " + node.getAttribute("cuirtailmentCost") + " " + node.getAttribute("costCoefficient");
 			break;

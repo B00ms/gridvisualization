@@ -137,7 +137,7 @@ public class GraphLogic {
 			
 			case "RG":
 				//renewable gen
-				node.addAttribute("ui.class", "RewGenerator"); 
+				node.addAttribute("ui.class", "RenewableGenerator"); 
 				node.addAttribute("subType", attributes[1]); //node subtype
 				node.addAttribute("nodeId", attributes[2]);
 				node.addAttribute("maxGen", attributes[3]);
@@ -300,7 +300,7 @@ public class GraphLogic {
 					break;
 				case "RG":
 					//renewable gen
-					node.addAttribute("ui.class", "RewGenerator"); 
+					node.addAttribute("ui.class", "RenewableGenerator"); 
 					node.addAttribute("subType", arrayAttr[1]); //node subtype
 					node.addAttribute("nodeId", arrayAttr[2]);
 					node.addAttribute("maxGen", arrayAttr[3]);
@@ -373,7 +373,7 @@ public class GraphLogic {
 					nodeId = node.getAttribute("ui.label").toString();
 					inners += "IN,"+nodeId+System.lineSeparator();
 					break;
-				case "RewGenerator":
+				case "RenewableGenerator":
 					nodeId = node.getAttribute("nodeId").toString();
 					subtype = node.getAttribute("subType").toString();
 					maxGen = node.getAttribute("maxProduction").toString();

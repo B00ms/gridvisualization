@@ -142,7 +142,7 @@ public class GraphGenerator {
 				i = 0;
 				break;
 			case "RG":
-				node1.addAttribute("ui.class", "RewGenerator");
+				node1.addAttribute("ui.class", "RenewableGenerator");
 				node1.addAttribute("subType", attr[1]); //node subtype
 				node1.addAttribute("nodeId", attr[2]); //node subtype
 				node1.addAttribute("ui.label", attr[2]);
@@ -218,7 +218,7 @@ public class GraphGenerator {
 				case "ConventionalGenerator":
 					minimumCapacity = (Double.valueOf(node1.getAttribute("upperGenLimit").toString()));
 					break;
-				case "RewGenerator":
+				case "RenewableGenerator":
 					minimumCapacity = (Integer.valueOf(node1.getAttribute("maxProduction").toString()));
 					break;
 				case "Consumer":
