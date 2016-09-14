@@ -558,13 +558,23 @@ public class GUI {
 					if (gfxNode != null && gfxNode.getSelectorType().equals(Selector.Type.NODE)) {
 						if(viewMode == VIEW_MODE.GRAPH_INSPECTION){
 							Node node = graphLogic.getGraph().getNode(gfxNode.getId());
-							lblIdentifier.setText(node.getId());
+							lblIdentifier.setText(node.getAttribute("ui.label"));
 							lblType.setText(node.getAttribute("ui.class").toString());
 	
 							setEdgeInformation(node);
 					
 							switch (lblType.getText()) {
 							case "ConventionalGenerator":
+								lblSubType.setText(node.getAttribute("subType").toString());
+								lblProduction.setText(node.getAttribute("production").toString());
+								lblMaxProduction.setText(node.getAttribute("upperGenLimit").toString());
+								lblMinimumProduction.setText(node.getAttribute("lowerGenLimit").toString());
+								if(node.getAttribute("failure") != null)
+									lblFailure.setText(node.getAttribute("failure").toString());
+								convAndRewGenerationInfoPanel.setVisible(true);
+								storageInfoPanel.setVisible(false);
+								consumerInfoPanel.setVisible(false);
+								break;
 							case "RewGenerator":
 								lblSubType.setText(node.getAttribute("subType").toString());
 								lblProduction.setText(node.getAttribute("production").toString());
@@ -592,9 +602,9 @@ public class GUI {
 								consumerInfoPanel.setVisible(true);
 								break;
 							case "Storage":
-								lblCurrentCharge.setText(node.getAttribute("currentCharge").toString());
-								lblMaximumCharge.setText(node.getAttribute("maxCharge").toString());
-								lblMinimumCharge.setText(node.getAttribute("minCharge").toString());
+								lblCurrentCharge.setText(node.getAttribute("currentSoC").toString());
+								lblMaximumCharge.setText(node.getAttribute("maxSoC").toString());
+								lblMinimumCharge.setText(node.getAttribute("minSoC").toString());
 								lblChargeEfficiency.setText(node.getAttribute("chargeEfficiency").toString());
 								lblDischargeEfficiency.setText(node.getAttribute("dischargeEfficiency").toString());
 	
@@ -712,10 +722,10 @@ public class GUI {
 			edgePanel.setLayout(new GridLayout(3, 2));
 			if( edge.getNode0().getId().equals(nodeId)){
 				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-					"<"+edge.getNode0().getId()+">---<"+edge.getNode1().getId()+">"));
+					"<"+edge.getNode0().getAttribute("ui.label")+">---<"+edge.getNode1().getAttribute("ui.label")+">"));
 			} else {
 				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-					"<"+edge.getNode1().getId()+">---<"+edge.getNode0().getId()+">"));
+					"<"+edge.getNode1().getAttribute("ui.label")+">---<"+edge.getNode0().getAttribute("ui.label")+">"));
 			}
 
 			Label lblFlow = new Label();

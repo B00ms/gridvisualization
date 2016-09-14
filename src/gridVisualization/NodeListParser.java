@@ -115,7 +115,7 @@ public class NodeListParser {
 				nodeMap.add(nodeAttributes);
 				break;
 			case "AE":
-				edgeId = record.get(1);
+				edgeId = String.valueOf((edgeMap.size()+1));
 				reactance = record.get(3);
 				capacity = record.get(4);
 				
