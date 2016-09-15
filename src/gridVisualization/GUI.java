@@ -375,6 +375,7 @@ public class GUI {
 		btnsmallWorld.addActionListener(new ActionListener() {		
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				loadEdgesAndNodes(e);
 				Graph graph = graphGenerator.createModifiedWattsStrogatz(numOuterNodes, numInnerNodes, numOfEdges, listModel, listModelEdges);
 				graphLogic.setGraph(graph);
 				setupGraphStreamView();
@@ -386,61 +387,73 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == btnLoadNodeList){
-					listModel.removeAllElements();
-					nodeList.removeAll();
-					edgesList.removeAll();
-					numOuterNodes = 0;
-					numInnerNodes = 0;
-					numOfEdges = 0;
+					loadEdgesAndNodes(e);
 					
-					int option = nodeListChooser.showOpenDialog(myFrame);
-					if(option == nodeListChooser.APPROVE_OPTION){
-						String selectedFile = nodeListChooser.getSelectedFile().getPath();
-						NodeListParser parser = new NodeListParser();
-						List<List<List<String>>> attributes =  parser.parseNodeList(selectedFile);
-						
-						List<List<String>> nodeMap = attributes.get(0);
-						Iterator<List<String>> it = nodeMap.iterator();
-						while(it.hasNext()){
-							List<String> node = it.next();
-							String nodeAttributes = "";
-							for(String value : node){
-								calculateNumberOfNodesAndEdges(value);
-								if(!(nodeAttributes.equals("")))
-									nodeAttributes = nodeAttributes + " " + value;
-								else
-									nodeAttributes += value;
-							}
-							listModel.addElement(nodeAttributes);
-							nodeList.setModel(listModel);
-							edgesList.setModel(listModelEdges);
-							scllPaneNodes.setViewportView(nodeList);
-							scllPaneEdges.setViewportView(edgesList);
-						}
-						List<List<String>> edgeMap = attributes.get(1);
-						Iterator<List<String>> itEdge = edgeMap.iterator();
-
-						while(itEdge.hasNext()){
-							List<String> edge = itEdge.next();
-							String edgeAttributes = "";
-							for(String value : edge){
-								calculateNumberOfNodesAndEdges(value);
-								if(!(edgeAttributes.equals("")))
-									edgeAttributes = edgeAttributes + " " + value;
-								else
-									edgeAttributes += value;
-							}
-							listModelEdges.addElement(edgeAttributes);
-							edgesList.setModel(listModelEdges);
-							scllPaneEdges.setViewportView(edgesList);
-						}
-					}
+					graphLogic.loadGraph(nodeList, edgesList);
+					setupGraphStreamView();
+					listModel.clear();
+					listModelEdges.clear();
 				}
-				System.out.println(listModelEdges.size());
-				System.out.println(numInnerNodes + " " + numOuterNodes);
 			}
 		});
 		
+	}
+	
+	private void loadEdgesAndNodes(ActionEvent e){
+
+		if(e.getSource() == btnLoadNodeList || e.getSource() == btnsmallWorld){
+			listModel.removeAllElements();
+			listModel.clear();
+			listModelEdges.clear();
+			nodeList.removeAll();
+			edgesList.removeAll();
+			numOuterNodes = 0;
+			numInnerNodes = 0;
+			numOfEdges = 0;
+			
+			int option = nodeListChooser.showOpenDialog(myFrame);
+			if(option == nodeListChooser.APPROVE_OPTION){
+				String selectedFile = nodeListChooser.getSelectedFile().getPath();
+				NodeListParser parser = new NodeListParser();
+				List<List<List<String>>> attributes =  parser.parseNodeList(selectedFile);
+				
+				List<List<String>> nodeMap = attributes.get(0);
+				Iterator<List<String>> it = nodeMap.iterator();
+				while(it.hasNext()){
+					List<String> node = it.next();
+					String nodeAttributes = "";
+					for(String value : node){
+						calculateNumberOfNodesAndEdges(value);
+						if(!(nodeAttributes.equals("")))
+							nodeAttributes = nodeAttributes + " " + value;
+						else
+							nodeAttributes += value;
+					}
+					listModel.addElement(nodeAttributes);
+					nodeList.setModel(listModel);
+					edgesList.setModel(listModelEdges);
+					scllPaneNodes.setViewportView(nodeList);
+					scllPaneEdges.setViewportView(edgesList);
+				}
+				List<List<String>> edgeMap = attributes.get(1);
+				Iterator<List<String>> itEdge = edgeMap.iterator();
+
+				while(itEdge.hasNext()){
+					List<String> edge = itEdge.next();
+					String edgeAttributes = "";
+					for(String value : edge){
+						calculateNumberOfNodesAndEdges(value);
+						if(!(edgeAttributes.equals("")))
+							edgeAttributes = edgeAttributes + " " + value;
+						else
+							edgeAttributes += value;
+					}
+					listModelEdges.addElement(edgeAttributes);
+					edgesList.setModel(listModelEdges);
+					scllPaneEdges.setViewportView(edgesList);
+				}
+			}
+		}
 	}
 	
 	private void calculateNumberOfNodesAndEdges(String value){
@@ -621,7 +634,7 @@ public class GUI {
 								graphLogic.getGraph().removeNode(node);
 								addToNodeList(node);
 							} else if(keydown == KEY_DOWN.ADD){
-								String id = String.valueOf(System.currentTimeMillis());
+								//String id = String.valueOf(System.currentTimeMillis());
 								graphLogic.addNode(gfxNode, nodeList, edgesList);							
 								//Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 								//id = UUID.randomUUID().toString();

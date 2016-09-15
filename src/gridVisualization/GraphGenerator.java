@@ -77,7 +77,7 @@ public class GraphGenerator {
 		List<String> innerEdges = new ArrayList<String>();
 		for(int i = 0; i < edgeList.size(); i++){
 			String[] edgeAttr = edgeList.get(i).split("\\s");
-			if(!edgeAttr[2].equals("0.0001"))
+			if(!edgeAttr[4].equals("0.0001"))
 				innerEdges.add(edgeList.get(i));
 		}
 		
@@ -194,7 +194,8 @@ public class GraphGenerator {
 		List<String> dummyEdges = new ArrayList<String>();
 		for(int i = 0; i < edgesList.getSize(); i++){
 			String[] edgeAttr = edgesList.get(i).split("\\s");
-			if(edgeAttr[2].equals("0.0001")){
+			System.out.println(edgeAttr[4]);
+			if(edgeAttr[4].equals("0.0001")){
 				dummyEdges.add(edgesList.get(i));
 			}
 		}
@@ -227,7 +228,7 @@ public class GraphGenerator {
 				}
 				
 				String[] edgeAttr = dummyEdges.get(i).split("\\s");
-				int capacity = Integer.valueOf(edgeAttr[3]);
+				int capacity = Integer.valueOf(edgeAttr[5]);
 				
 				if(capacity == minimumCapacity && node1.getId() != node2.getId()){
 					Edge edge = null;
@@ -238,8 +239,8 @@ public class GraphGenerator {
 					
 					edge.addAttribute("edgeId", edgeAttr[1]);
 					edge.addAttribute("flow", "0");
-					edge.addAttribute("reactance", edgeAttr[2]);
-					edge.addAttribute("capacity", edgeAttr[3]);
+					edge.addAttribute("reactance", edgeAttr[4]);
+					edge.addAttribute("capacity", edgeAttr[5]);
 					usedEdges.add(dummyEdges.get(i));
 					dummyEdges.remove(i);				
 					break;
@@ -249,8 +250,8 @@ public class GraphGenerator {
 					
 					edge.addAttribute("edgeId", edgeAttr[1]);
 					edge.addAttribute("flow", "0");
-					edge.addAttribute("reactance", edgeAttr[2]);
-					edge.addAttribute("capacity", edgeAttr[3]);
+					edge.addAttribute("reactance", edgeAttr[4]);
+					edge.addAttribute("capacity", edgeAttr[5]);
 					usedEdges.add(dummyEdges.get(i));
 					dummyEdges.remove(i);			
 					

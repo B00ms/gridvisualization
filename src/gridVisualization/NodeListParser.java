@@ -116,10 +116,14 @@ public class NodeListParser {
 				break;
 			case "AE":
 				edgeId = String.valueOf((edgeMap.size()+1));
+				String node1 = record.get(1);
+				String node2 = record.get(2);
 				reactance = record.get(3);
 				capacity = record.get(4);
 				
 				edgeAttributes.add(edgeId);
+				edgeAttributes.add(node1);
+				edgeAttributes.add(node2);
 				edgeAttributes.add(reactance);
 				edgeAttributes.add(capacity);
 				edgeMap.add(edgeAttributes);

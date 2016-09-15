@@ -261,6 +261,111 @@ public class GraphLogic {
 			e.printStackTrace();
 		}
 	}
+	
+	public void loadGraph(JList<String> nodeList, JList<String> edgeList){
+		graph = new MultiGraph("mygraph new graph super sexy");
+	    graph.addAttribute("ui.quality");
+	    graph.addAttribute("ui.antialias");
+	    graph.addAttribute("ui.stylesheet", "url(mySheet.css)");
+		for(int i = 0; i < nodeList.getModel().getSize(); i++){
+			String[] arrayAttr = ((DefaultListModel<String>)nodeList.getModel()).get(i).split("\\s");	
+
+		    
+			//String id = String.valueOf(arrayAttr[2]);
+			//graph.addNode(id);
+			Node node;
+			
+			switch (arrayAttr[0]) {
+			case "CG":
+				graph.addNode(arrayAttr[2]);
+				node = graph.getNode(arrayAttr[2]);
+				node.addAttribute("ui.class", "ConventionalGenerator"); 
+				node.addAttribute("ui.label", arrayAttr[2]);
+				node.addAttribute("subType", arrayAttr[1]); //node subtype
+				node.addAttribute("nodeId", arrayAttr[2]);
+				node.addAttribute("lowerGenLimit", arrayAttr[2]); //lower gen limit
+				node.addAttribute("upperGenLimit", arrayAttr[3]);
+				node.addAttribute("costCoefficient", arrayAttr[4]);
+				node.addAttribute("production", "0");
+				break;
+			case "C":
+				graph.addNode(arrayAttr[1]);
+				node = graph.getNode(arrayAttr[1]);
+				node.addAttribute("ui.class", "Consumer"); 
+				node.addAttribute("nodeId", arrayAttr[1]);
+				node.addAttribute("ui.label", arrayAttr[1]);
+				node.addAttribute("consumptionPercentage", arrayAttr[2]);
+				node.addAttribute("load", "0");
+				node.addAttribute("flow", "0");
+				break;
+			case "RG":
+				//renewable gen
+				graph.addNode(arrayAttr[2]);
+				node = graph.getNode(arrayAttr[2]);
+				node.addAttribute("ui.class", "RenewableGenerator"); 
+				node.addAttribute("subType", arrayAttr[1]); //node subtype
+				node.addAttribute("nodeId", arrayAttr[2]);
+				node.addAttribute("ui.label", arrayAttr[2]);
+				node.addAttribute("maxProduction", arrayAttr[3]);
+				node.addAttribute("cuirtailmentCost", arrayAttr[4]);
+				node.addAttribute("costCoefficient", arrayAttr[5]);
+				node.addAttribute("production", "0");
+				break;
+			case "Storage":
+				graph.addNode(arrayAttr[1]);
+				node = graph.getNode(arrayAttr[1]);
+				node.addAttribute("ui.class", "Storage"); 
+				node.addAttribute("nodeId", arrayAttr[1]);
+				node.addAttribute("ui.label", arrayAttr[1]);
+				node.addAttribute("currentSoC", arrayAttr[2]);
+				node.addAttribute("maxSoC", arrayAttr[3]);
+				node.addAttribute("minSoC", arrayAttr[4]);
+				node.addAttribute("chMax", arrayAttr[5]);
+				node.addAttribute("chargeEfficiency", "0.87");
+				node.addAttribute("dischargeEfficiency", "0.87");
+				node.addAttribute("status", "N/A");
+				break;
+			case "IN":
+				graph.addNode(arrayAttr[1]);
+				node = graph.getNode(arrayAttr[1]);
+				node.addAttribute("ui.label", arrayAttr[1]);
+				node.addAttribute("nodeId", arrayAttr[1]);
+				node.addAttribute("ui.label", arrayAttr[1]);
+				node.addAttribute("ui.class", "InnerNode");
+				break;
+			default:
+				break;
+			}
+		}
+		
+		for(int i = 0; i < edgeList.getModel().getSize(); i++){
+			String[] attr = ((DefaultListModel<String>)edgeList.getModel()).get(i).split("\\s");
+		
+/*			Iterator<Node> it = graph.getNodeIterator();
+			Iterator<Node> it2 = graph.getNodeIterator();*/
+			
+			graph.addEdge(String.valueOf(i), attr[2], attr[3]);
+			Edge edge = graph.getEdge(i);
+			edge.addAttribute("edgeId", attr[1]);
+			edge.addAttribute("flow", "0");
+			edge.addAttribute("reactance", attr[4]);
+			edge.addAttribute("capacity", attr[5]);
+			
+/*			while(it.hasNext()){
+				Node node1 = it.next();
+				it2 = graph.getNodeIterator();
+				String node1Id = node1.getAttribute("nodeId");
+				while(it2.hasNext()){
+					Node node2 = it2.next();
+					String node2Id = node2.getAttribute("nodeId");
+					System.out.println(node1Id + " " + node2Id);
+					if(node1Id == attr[2] && node2Id == attr[3])
+						graph.addEdge(UUID.randomUUID().toString(), node1, node2);
+				}
+			}*/
+		}
+		System.out.println(graph.getEdgeCount());
+	}
 
 	public void setDirectory(String directory){
 		this.directory = directory;
@@ -287,8 +392,6 @@ public class GraphLogic {
 					node.addAttribute("ui.class", "ConventionalGenerator"); 
 					node.addAttribute("subType", arrayAttr[1]); //node subtype
 					node.addAttribute("nodeId", arrayAttr[2]);
-					
-				
 					node.addAttribute("lowerGenLimit", arrayAttr[2]); //lower gen limit
 					node.addAttribute("upperGenLimit", arrayAttr[3]);
 					node.addAttribute("costCoefficient", arrayAttr[4]);
