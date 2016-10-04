@@ -11,23 +11,26 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 
 import org.graphstream.algorithm.Toolkit;
+import org.graphstream.algorithm.generator.BarabasiAlbertGenerator;
 import org.graphstream.algorithm.generator.Generator;
+import org.graphstream.algorithm.generator.PreferentialAttachmentGenerator;
 import org.graphstream.algorithm.generator.WattsStrogatzGenerator;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
+import org.graphstream.graph.implementations.SingleGraph;
 
 public class GraphGenerator {
 	
-	public MultiGraph createModifiedWattsStrogatz(int numOuterNodes, int numInnerNodes, int numEdges, DefaultListModel<String> nodeList, DefaultListModel<String> edgeList){
+	public SingleGraph createModifiedWattsStrogatz(int numOuterNodes, int numInnerNodes, int numEdges, DefaultListModel<String> nodeList, DefaultListModel<String> edgeList){
 		
-		MultiGraph graph = new MultiGraph("radial");
+		SingleGraph graph = new SingleGraph("radial");
 	    graph.addAttribute("ui.quality");
 	    graph.addAttribute("ui.antialias");
 	    graph.addAttribute("ui.stylesheet", "url(mySheet.css)");
 		//N vertices, k edges per vertice, beta = regularity (0 to 1) 
-		Generator graphGenerator = new WattsStrogatzGenerator(numInnerNodes, 2, 0.9);
+		Generator graphGenerator = new WattsStrogatzGenerator(numInnerNodes, 2, 0.5);
 
 		graphGenerator.addSink(graph);
 		graphGenerator.begin();
@@ -40,12 +43,46 @@ public class GraphGenerator {
 		setInnerEdges(graph, edgeList);
 		setOuterEdges(graph, edgeList, numOuterNodes);
 		
+		Iterator<Edge> edgeIt = graph.getEdgeIterator();
+		while(edgeIt.hasNext()){
+			Edge edge = edgeIt.next();
+			edge.addAttribute("length", 1);
+		}
+		
 		System.out.println("Node count in graph: " + graph.getNodeCount());
 		System.out.println("Edge count in graph: " + graph.getEdgeCount());
 		System.out.println("Edges in input file: " + numEdges);
 		System.out.println("Edges in list file: " + edgeList.size());
 		return graph;
 		
+	}
+	
+	public SingleGraph createPreferentialAttachmentGraph(int numOuterNodes, int numInnerNodes, int numEdges, DefaultListModel<String> nodeList, DefaultListModel<String> edgeList){
+		
+		SingleGraph graph = new SingleGraph("Preferential");
+	    graph.addAttribute("ui.quality");
+	    graph.addAttribute("ui.antialias");
+	    graph.addAttribute("ui.stylesheet", "url(mySheet.css)");
+	    
+	    Generator gen = new BarabasiAlbertGenerator(1);
+	    
+	    gen.addSink(graph);
+	    gen.begin();
+	    
+	    for(int i = 0; i < numInnerNodes-2; i++){
+	    	gen.nextEvents();
+	    }
+	    gen.end();
+	    System.out.println(graph.getNodeCount());
+	    System.out.println(graph.getEdgeCount());
+	    setInnerNodes(graph, nodeList);
+	    setOuterNodes(graph, nodeList);
+	    setInnerEdges(graph, edgeList);
+	    setOuterEdges(graph, edgeList, numOuterNodes);
+	    
+		
+
+		return graph;
 	}
 	
 	public void setInnerNodes(Graph graph, DefaultListModel<String> nodeList){
@@ -194,7 +231,6 @@ public class GraphGenerator {
 		List<String> dummyEdges = new ArrayList<String>();
 		for(int i = 0; i < edgesList.getSize(); i++){
 			String[] edgeAttr = edgesList.get(i).split("\\s");
-			System.out.println(edgeAttr[4]);
 			if(edgeAttr[4].equals("0.0001")){
 				dummyEdges.add(edgesList.get(i));
 			}
@@ -204,7 +240,7 @@ public class GraphGenerator {
 		for(int j = 0; j < outerNodes.size(); j++){
 			Node node1 = outerNodes.get(j);
 			for(int i=0; i < dummyEdges.size(); i++){
-
+			
 				Node node2 = null;
 				
 				int indx = rand.nextInt(outerNodes.size());
@@ -230,21 +266,27 @@ public class GraphGenerator {
 				String[] edgeAttr = dummyEdges.get(i).split("\\s");
 				int capacity = Integer.valueOf(edgeAttr[5]);
 				
-				if(capacity == minimumCapacity && node1.getId() != node2.getId()){
+				if((capacity == minimumCapacity && node1.getId() != node2.getId()) ){
 					Edge edge = null;
-					if(node1.getAttribute("ui.class").toString().equals("Consumer"))
+					if(node1.getAttribute("ui.class").toString().equals("Consumer")){
 						edge = graph.addEdge(String.valueOf(graph.getEdgeCount()+1), node2, node1);
-					else
+						edge.addAttribute("node1Id", edgeAttr[2]);
+						edge.addAttribute("node2Id", edgeAttr[1]);
+					}else{
 						edge = graph.addEdge(String.valueOf(graph.getEdgeCount()+1), node1, node2);
+						edge.addAttribute("node1Id", edgeAttr[1]);
+						edge.addAttribute("node2Id", edgeAttr[2]);
+					}
 					
 					edge.addAttribute("edgeId", edgeAttr[1]);
 					edge.addAttribute("flow", "0");
-					edge.addAttribute("reactance", edgeAttr[4]);
+					edge.addAttribute("reactance", edgeAttr[4]);	
 					edge.addAttribute("capacity", edgeAttr[5]);
 					usedEdges.add(dummyEdges.get(i));
-					dummyEdges.remove(i);				
+					dummyEdges.remove(i);		
+					i = 0;
 					break;
-				}else if(node1.getAttribute("ui.class").toString().equals("Storage") && capacity >= minimumCapacity){
+				}else if(node1.getAttribute("ui.class").toString().equals("Storage") && capacity >= minimumCapacity && node1.getId() != node2.getId()){
 					Edge edge = null;
 					edge = graph.addEdge(String.valueOf(graph.getEdgeCount()+1), node1, node2);
 					
@@ -254,7 +296,7 @@ public class GraphGenerator {
 					edge.addAttribute("capacity", edgeAttr[5]);
 					usedEdges.add(dummyEdges.get(i));
 					dummyEdges.remove(i);			
-					
+					i = 0;
 					break;
 				}
 			}

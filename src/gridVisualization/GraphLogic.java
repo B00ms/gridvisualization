@@ -13,6 +13,7 @@ import java.util.UUID;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 
+import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -63,26 +64,62 @@ public class GraphLogic {
 		switch(attributesArray[0]){
 		case "CG": 
 			newNode = graph.addNode(attributesArray[2]);
+			newNode.addAttribute("ui.class", "ConventionalGenerator");
+			newNode.addAttribute("subType", attributesArray[1]); //node subtype
+			newNode.addAttribute("nodeId", attributesArray[2]);
+			newNode.addAttribute("ui.label", attributesArray[2]);
+			newNode.addAttribute("lowerGenLimit", attributesArray[3]); //lower gen limit
+			newNode.addAttribute("upperGenLimit", attributesArray[4]);
+			newNode.addAttribute("costCoefficient", attributesArray[5]);
+			newNode.addAttribute("production", "0");
+			
 			break;
 		case "C":
 			newNode = graph.addNode(attributesArray[1]);
+			newNode.addAttribute("ui.class", "Consumer");
+			newNode.addAttribute("nodeId", attributesArray[1]);
+			newNode.addAttribute("ui.label", attributesArray[1]);
+			newNode.addAttribute("consumptionPercentage", attributesArray[2]);
+			newNode.addAttribute("load", "0");
 			break;
 		case "IN":
 			newNode = graph.addNode(attributesArray[1]);
 			break;
 		case "RG":
 			newNode = graph.addNode(attributesArray[2]);
+			newNode.addAttribute("ui.class", "RenewableGenerator");
+			newNode.addAttribute("subType", attributesArray[1]); //node subtype
+			newNode.addAttribute("nodeId", attributesArray[2]); //node subtype
+			newNode.addAttribute("ui.label", attributesArray[2]);
+			newNode.addAttribute("maxProduction", attributesArray[3]);
+			newNode.addAttribute("minProduction", "0");
+			newNode.addAttribute("cuirtailmentCost", attributesArray[4]);
+			newNode.addAttribute("costCoefficient", attributesArray[5]);
+			newNode.addAttribute("production", "0");
 			break;
 		case "Storage":
 			newNode = graph.addNode(attributesArray[1]);
+			newNode.addAttribute("ui.class", "Storage");
+			newNode.addAttribute("nodeId", attributesArray[1]);
+			newNode.addAttribute("ui.label", attributesArray[1]);
+			newNode.addAttribute("currentSoC", attributesArray[2]);
+			newNode.addAttribute("maxSoC", attributesArray[3]);
+			newNode.addAttribute("minSoC", attributesArray[4]);
+			newNode.addAttribute("chMax", attributesArray[5]);
+			newNode.addAttribute("chargeEfficiency", "0.87");
+			newNode.addAttribute("dischargeEfficiency", "0.87");
+			newNode.addAttribute("status", "N/A");
 			break;
 		}
 		newNode = setAttributes(newNode, attributesArray);
 		Edge edge = graph.addEdge(UUID.randomUUID().toString(), node1, newNode);
 		String[] edgeAttr = ((DefaultListModel<String>)edgeList.getModel()).get(0).split("\\s");
-		edge.setAttribute("edgeId", edgeAttr[1]);
-		edge.setAttribute("reactance", edgeAttr[2]);
-		edge.setAttribute("capacity", edgeAttr[3]);
+		edge.addAttribute("edgeId", edgeAttr[1]);
+		edge.addAttribute("node1Id", edgeAttr[2]);
+		edge.addAttribute("node2Id", edgeAttr[3]);
+		edge.addAttribute("reactance", edgeAttr[4]);
+		edge.addAttribute("capacity", edgeAttr[5]);
+
 		((DefaultListModel<String>)edgeList.getModel()).remove(0);
 		
 		((DefaultListModel<String>)nodeList.getModel()).remove(0);
@@ -350,6 +387,9 @@ public class GraphLogic {
 			edge.addAttribute("flow", "0");
 			edge.addAttribute("reactance", attr[4]);
 			edge.addAttribute("capacity", attr[5]);
+			edge.addAttribute("node1Id", attr[2]);
+			edge.addAttribute("node2Id", attr[3]);
+			edge.addAttribute("length", 1);
 			
 /*			while(it.hasNext()){
 				Node node1 = it.next();
@@ -442,6 +482,29 @@ public class GraphLogic {
 		node.addAttribute("nodeId", arrayAttr[1]);
 	}
 	
+	@SuppressWarnings("unused")
+	public void calculateMetrics(){
+		
+		GraphMetrics gMetrics = new GraphMetrics();
+		double avgDegree= Toolkit.averageDegree(graph);
+		int[] degreeDistribution = Toolkit.degreeDistribution(graph);
+		double betweenessDistribution = 0;
+		
+		gMetrics.getBetweenessCentrality(graph);
+		//characteristic path
+		double L = gMetrics.getCharacteristicPathPength(graph);
+		double smallWorldProp = gMetrics.getSmallWorldProperty(graph);
+		double avgClusteringCoefficient = 	Toolkit.averageClusteringCoefficient(graph);
+		double diameter = Toolkit.diameter(graph);
+		
+		System.out.println("avgDegree " + avgDegree);
+		System.out.println("betwebess " + betweenessDistribution);
+		System.out.println("L " +L);
+		System.out.println("small world " + smallWorldProp);
+		System.out.println("clusting " + avgClusteringCoefficient);
+		System.out.println("diameter " + diameter);
+		System.out.println("roar");
+	}
 	
 	public void saveGraph(){
 		
@@ -512,8 +575,10 @@ public class GraphLogic {
 			while(edgeIt.hasNext()){
 				Edge edge = edgeIt.next();
 				
+				
 				String nodeOneId = edge.getNode0().getAttribute("nodeId").toString();
 				String nodeTwoId = edge.getNode1().getAttribute("nodeId").toString();
+				System.out.println(nodeOneId + " "+ nodeTwoId);
 				String reactance = edge.getAttribute("reactance").toString();
 				String capacity = edge.getAttribute("capacity").toString();
 				String line = "AE,"+nodeOneId+","+nodeTwoId+","+reactance+","+capacity+System.lineSeparator();

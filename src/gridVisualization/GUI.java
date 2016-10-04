@@ -108,15 +108,15 @@ public class GUI {
 	private String selectedDirectory = "";
 	
 	// Generation
-	private JButton btnsmallWorld = new JButton("generate small world graph");
+	private JButton btnsmallWorld = new JButton("Generate small world graph");
 	private DefaultListModel<String> listModel = new DefaultListModel<String>();
 	private JScrollPane scllPaneNodes = new JScrollPane();
 	private JList<String> nodeList = new JList<String>();
 	private JButton btnLoadNodeList = new JButton("Load Node List");
 	private JFileChooser nodeListChooser = new JFileChooser();
 	private JButton btnSaveGraph = new JButton("Save Graph");
-	private JButton btnAssignEdges = new JButton("Assign Edges Nodes");
-	private JButton btnAssignNodes= new JButton("Assign Nodes");
+	private JButton btnCalculateMetrics = new JButton("Calculate metrics");
+	private JButton btnGenPreferentialGraph= new JButton("Generate preferential attachment graph");
 	
 	private DefaultListModel<String> listModelEdges = new DefaultListModel<String>();
 	private JScrollPane scllPaneEdges = new JScrollPane();
@@ -276,14 +276,14 @@ public class GUI {
 		constr.weightx = 0.0;
 		constr.gridx = 0;
 		constr.gridy = 1;
-		generationPanel.add(btnAssignNodes, constr);
+		generationPanel.add(btnGenPreferentialGraph, constr);
 		
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.weightx = 0.0;
 		constr.gridx = 1;
 		constr.gridy = 1;
 		constr.insets = new Insets(2, 2, 2, 2);
-		generationPanel.add(btnAssignEdges, constr);
+		generationPanel.add(btnCalculateMetrics, constr);
 		
 		constr.fill = GridBagConstraints.BOTH;
 		constr.weightx = 1.0;
@@ -331,11 +331,14 @@ public class GUI {
 			}
 		});
 		
-		btnAssignNodes.addActionListener(new ActionListener() {
+		btnGenPreferentialGraph.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				graphLogic.assignNodes(numOuterNodes+numInnerNodes, listModel);
+				loadEdgesAndNodes(e);
+				Graph graph = graphGenerator.createPreferentialAttachmentGraph(numOuterNodes, numInnerNodes, numOfEdges, listModel, listModelEdges);
+				graphLogic.setGraph(graph);
+				setupGraphStreamView();
 			}
 		});
 		
@@ -401,7 +404,7 @@ public class GUI {
 	
 	private void loadEdgesAndNodes(ActionEvent e){
 
-		if(e.getSource() == btnLoadNodeList || e.getSource() == btnsmallWorld){
+		if(e.getSource() == btnLoadNodeList || e.getSource() == btnsmallWorld || e.getSource() == btnGenPreferentialGraph){
 			listModel.removeAllElements();
 			listModel.clear();
 			listModelEdges.clear();
@@ -679,6 +682,52 @@ public class GUI {
 				}
 			}
 		});
+		
+		
+		btnCalculateMetrics.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				if(e.getSource() == btnCalculateMetrics)
+					graphLogic.calculateMetrics();
+			}
+		});
+/*		btnCalculateMetrics.addActionListener(new ActionListener() {
+			
+			
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Action.
+			
+				
+			}
+		});*/
 	}
 	
 	private void addToNodeList(Node node){
@@ -715,7 +764,7 @@ public class GUI {
 	private void addEdgeToList(Collection<Edge> edgeCol){
 		
 		for(Edge edge : edgeCol){
-			String strEdge = "AE " + edge.getAttribute("edgeId") + " " + edge.getAttribute("reactance") + " " + edge.getAttribute("capacity");
+			String strEdge = "AE " + edge.getAttribute("edgeId") + " " + edge.getAttribute("node1Id") + " " + edge.getAttribute("node2Id") +" " + edge.getAttribute("reactance") + " " + edge.getAttribute("capacity");
 			listModelEdges.add(0, strEdge);
 			edge.clearAttributes();
 		}
