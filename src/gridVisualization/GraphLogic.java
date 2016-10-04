@@ -520,19 +520,33 @@ public class GraphLogic {
 			
 			while(nodeIt.hasNext()){
 				Node node = nodeIt.next();
+				String subtype = "";
+				String nodeId = "";
+				String minGen = "";
+				String maxGen = "";
+				String costCoef = "";
+				
+				String consPerc = ""; 
+				
+				String cuirtCost = "";
+				
+				String currentSoC = "";
+				String maxSoC = "";
+				String minSoC = "";
+				String chMax = "";
 				
 				switch (node.getAttribute("ui.class").toString()) {
 				case "ConventionalGenerator":
-					String subtype = node.getAttribute("subType").toString();
-					String nodeId = node.getAttribute("nodeId").toString();
-					String minGen = node.getAttribute("lowerGenLimit").toString();
-					String maxGen = node.getAttribute("upperGenLimit").toString();
-					String costCoef = node.getAttribute("costCoefficient").toString();
+					subtype = node.getAttribute("subType").toString();
+					nodeId = node.getAttribute("nodeId").toString();
+					minGen = node.getAttribute("lowerGenLimit").toString();
+					maxGen = node.getAttribute("upperGenLimit").toString();
+					costCoef = node.getAttribute("costCoefficient").toString();
 					cGens += "CG,"+subtype+","+nodeId+","+minGen+","+maxGen+","+costCoef+System.lineSeparator();
 					break;
 				case "Consumer":
 					nodeId = node.getAttribute("nodeId").toString();
-					String consPerc = node.getAttribute("consumptionPercentage").toString();
+					consPerc = node.getAttribute("consumptionPercentage").toString();
 					consumers += "C,"+nodeId+","+consPerc+System.lineSeparator();
 					break;
 				case "InnerNode":
@@ -543,16 +557,16 @@ public class GraphLogic {
 					nodeId = node.getAttribute("nodeId").toString();
 					subtype = node.getAttribute("subType").toString();
 					maxGen = node.getAttribute("maxProduction").toString();
-					String cuirtCost = node.getAttribute("cuirtailmentCost").toString();
+					cuirtCost = node.getAttribute("cuirtailmentCost").toString();
 					costCoef = node.getAttribute("costCoefficient").toString();
 					rgens += "RG,"+subtype+","+nodeId+","+maxGen+","+cuirtCost+","+costCoef+System.lineSeparator();
 					break;
 				case "Storage":
 					nodeId = node.getAttribute("nodeId").toString();
-					String currentSoC = node.getAttribute("currentSoC").toString();
-					String maxSoC = node.getAttribute("maxSoC").toString();
-					String minSoC = node.getAttribute("minSoC").toString();
-					String chMax = node.getAttribute("chMax").toString();
+					currentSoC = node.getAttribute("currentSoC").toString();
+					maxSoC = node.getAttribute("maxSoC").toString();
+					minSoC = node.getAttribute("minSoC").toString();
+					chMax = node.getAttribute("chMax").toString();
 					stors += "Storage,"+nodeId+","+currentSoC+","+maxSoC+","+minSoC+","+chMax+System.lineSeparator();
 					break;
 				default:
