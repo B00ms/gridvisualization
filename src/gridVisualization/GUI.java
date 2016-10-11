@@ -31,6 +31,8 @@ import java.util.UUID;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -46,6 +48,7 @@ import javax.swing.SpringLayout.Constraints;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.FileChooserUI;
+import javax.swing.plaf.basic.BasicTreeUI.SelectionModelPropertyChangeHandler;
 
 import org.bouncycastle.asn1.cms.Time;
 import org.graphstream.graph.Edge;
@@ -154,28 +157,12 @@ public class GUI {
 		System.out.println("setup panels");
 		informationPanel = new JPanel();
 		informationPanel.setLayout(new BoxLayout(informationPanel, BoxLayout.PAGE_AXIS));
-
-		File folder = new File("graphstate");
-		File[] graphstates = folder.listFiles();
-
-		String[] fileNames = new String[graphstates.length];
-		for (int i = 0; i < graphstates.length; i++)
-			fileNames[i] = graphstates[i].getName();
-
-		NaturalOrderComparator comparator = new NaturalOrderComparator();
-		Arrays.sort(fileNames, comparator);
-
 		informationPanel.add(btnOpenSelectDirectory);
-		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		fileChooser.setCurrentDirectory(new File("./"));
-
-		timestepDropdown = new JComboBox<String>(fileNames);
-		timestepDropdown.setFocusable(false);
-		timestepDropdown.setSize(new Dimension(200, 10));
-		timestepDropdown.setSelectedIndex(timeStepSelectionIndex);
+		timestepDropdown = new JComboBox<String>();
+		setuptimeStepDropDown("");
 		informationPanel.add(timestepDropdown);
 		informationPanel.add(Box.createRigidArea(new Dimension(500, 100)));
-
+		
 		setupNodeAndEdgeInfoPanel();
 
 		informationPanel.add(Box.createRigidArea(new Dimension(informationPanel.getWidth(), 800)));
@@ -191,6 +178,30 @@ public class GUI {
 					viewMode = VIEW_MODE.GRAPH_GENERATION;	
 			}
 		});
+	}
+	
+	private void setuptimeStepDropDown(String selectedDirectory){
+		File folder;
+		if(!selectedDirectory.isEmpty())
+			folder = new File(selectedDirectory);
+		else
+			folder = new File("graphstate");
+		File[] graphstates = folder.listFiles();
+
+		String[] fileNames = new String[graphstates.length];
+		for (int i = 0; i < graphstates.length; i++)
+			fileNames[i] = graphstates[i].getName();
+
+		NaturalOrderComparator comparator = new NaturalOrderComparator();
+		Arrays.sort(fileNames, comparator);
+
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fileChooser.setCurrentDirectory(new File("./"));
+		DefaultComboBoxModel <String> comboModel = new DefaultComboBoxModel<String>(fileNames);
+		timestepDropdown.setModel(comboModel);
+		timestepDropdown.setSelectedIndex(timeStepSelectionIndex);
+		informationPanel.repaint();
+		timestepDropdown.repaint();
 	}
 
 	private void setupNodeAndEdgeInfoPanel() {
@@ -361,6 +372,7 @@ public class GUI {
 					int option = fileChooser.showOpenDialog(myFrame);
 					if (option == JFileChooser.APPROVE_OPTION){
 						selectedDirectory = fileChooser.getSelectedFile().getPath();
+						setuptimeStepDropDown(selectedDirectory);
 						graphLogic.setDirectory(selectedDirectory);
 
 						timeStepSelectionIndex = 0;
@@ -654,8 +666,8 @@ public class GUI {
 										Edge edge = graphLogic.getGraph().addEdge(id, nodeOne, nodeTwo);
 										String[] attr = ((DefaultListModel<String>)edgesList.getModel()).get(0).split("\\s");
 										edge.setAttribute("edgeID", attr[1]);
-										edge.setAttribute("reactance", attr[2]);
-										edge.setAttribute("capacity", attr[3]);
+										edge.setAttribute("reactance", attr[4]);
+										edge.setAttribute("capacity", attr[5]);
 										((DefaultListModel<String>)edgesList.getModel()).remove(0);
 											nodeOne = "";
 									}
@@ -764,7 +776,7 @@ public class GUI {
 	private void addEdgeToList(Collection<Edge> edgeCol){
 		
 		for(Edge edge : edgeCol){
-			String strEdge = "AE " + edge.getAttribute("edgeId") + " " + edge.getAttribute("node1Id") + " " + edge.getAttribute("node2Id") +" " + edge.getAttribute("reactance") + " " + edge.getAttribute("capacity");
+			String strEdge = "AE " + edge.getAttribute("edgeId") + " " + edge.getNode0().getAttribute("nodeId") + " " + edge.getNode1().getAttribute("nodeId") +" " + edge.getAttribute("reactance") + " " + edge.getAttribute("capacity");
 			listModelEdges.add(0, strEdge);
 			edge.clearAttributes();
 		}
@@ -849,7 +861,7 @@ public class GUI {
 			myFrame.remove(view);
 			myFrame.revalidate();
 			myFrame.repaint();
-			viewer.close();
+			//viewer.close();
 		}
 
 		viewer = new Viewer(graphLogic.getGraph(), Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);

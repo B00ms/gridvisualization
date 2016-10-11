@@ -128,8 +128,8 @@ public class GraphGenerator {
 				String[] edgeAttr = innerEdges.get(randomEdgeIndex).split("\\s");
 				edge.addAttribute("edgeId", edgeAttr[1]);
 				edge.addAttribute("flow", "0");
-				edge.addAttribute("reactance", edgeAttr[2]);
-				edge.addAttribute("capacity", edgeAttr[3]);
+				edge.addAttribute("reactance", edgeAttr[4]);
+				edge.addAttribute("capacity", edgeAttr[5]);
 				addedEdges.add(innerEdges.get(randomEdgeIndex));
 				innerEdges.remove(randomEdgeIndex);
 		}

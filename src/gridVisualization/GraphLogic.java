@@ -112,7 +112,11 @@ public class GraphLogic {
 			break;
 		}
 		newNode = setAttributes(newNode, attributesArray);
-		Edge edge = graph.addEdge(UUID.randomUUID().toString(), node1, newNode);
+		Edge edge;
+		if(!attributesArray[0].equals("storage") || !attributesArray[0].equals("consumer"))
+			edge = graph.addEdge(UUID.randomUUID().toString(), newNode, node1);
+		else
+			edge = graph.addEdge(UUID.randomUUID().toString(), node1, newNode);
 		String[] edgeAttr = ((DefaultListModel<String>)edgeList.getModel()).get(0).split("\\s");
 		edge.addAttribute("edgeId", edgeAttr[1]);
 		edge.addAttribute("node1Id", edgeAttr[2]);
@@ -191,6 +195,7 @@ public class GraphLogic {
 				node.addAttribute("maxSoC", attributes[3]);
 				node.addAttribute("minSoC", attributes[4]);
 				node.addAttribute("chMax", attributes[5]);
+				node.addAttribute("flow", "0");
 			break;
 		}
 		//node.addAttribute("ui.style", "shadow-color:red;");
@@ -282,21 +287,23 @@ public class GraphLogic {
 		graph = new MultiGraph("mygraph new graph super sexy");
 	    graph.addAttribute("ui.quality");
 	    graph.addAttribute("ui.antialias");
-
-        String file = directory+"/"+filename;
-        try {
-			FileSource fileSource = FileSourceFactory.sourceFor(file);
-
-			fileSource.addSink(graph);
-			fileSource.begin(file);
-			fileSource.nextStep();
-			graph = setNodeStyle(graph);
-			graph = setEdgeStyle(graph);
-			fileSource.end();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	    
+	    if(!directory.isEmpty()){
+	        String file = directory+"/"+filename;
+	        try {
+				FileSource fileSource = FileSourceFactory.sourceFor(file);
+	
+				fileSource.addSink(graph);
+				fileSource.begin(file);
+				fileSource.nextStep();
+				graph = setNodeStyle(graph);
+				graph = setEdgeStyle(graph);
+				fileSource.end();
+	
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    }
 	}
 	
 	public void loadGraph(JList<String> nodeList, JList<String> edgeList){
@@ -491,6 +498,10 @@ public class GraphLogic {
 		double betweenessDistribution = 0;
 		
 		gMetrics.getBetweenessCentrality(graph);
+		for(Node node : graph){
+			System.out.print(node.getAttribute("nodeId").toString() + " ");
+			System.out.println(node.getAttribute("Cb").toString());
+		}
 		//characteristic path
 		double L = gMetrics.getCharacteristicPathPength(graph);
 		double smallWorldProp = gMetrics.getSmallWorldProperty(graph);
