@@ -439,9 +439,9 @@ public class GraphLogic {
 					node.addAttribute("ui.class", "ConventionalGenerator"); 
 					node.addAttribute("subType", arrayAttr[1]); //node subtype
 					node.addAttribute("nodeId", arrayAttr[2]);
-					node.addAttribute("lowerGenLimit", arrayAttr[2]); //lower gen limit
-					node.addAttribute("upperGenLimit", arrayAttr[3]);
-					node.addAttribute("costCoefficient", arrayAttr[4]);
+					node.addAttribute("lowerGenLimit", arrayAttr[3]); //lower gen limit
+					node.addAttribute("upperGenLimit", arrayAttr[4]);
+					node.addAttribute("costCoefficient", arrayAttr[5]);
 					break;
 				case "C":
 					node.addAttribute("ui.class", "Consumer"); 
