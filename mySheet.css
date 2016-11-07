@@ -1,6 +1,7 @@
 node {
-	text-alignment: under;
-	size:14px;
+	text-alignment: center;
+	text-style:bold;
+	size:18px;
 	shadow-mode:plain;
 	shadow-offset:0px; 
  	shadow-color:#E4E4E4;
@@ -14,6 +15,7 @@ edge{
 
 node.Storage {
 	fill-color: blue;
+	text-color:white;
 	}
 	
 node.ConventionalGenerator {
@@ -30,4 +32,5 @@ node.Consumer {
 
 node.InnerNode {
 	fill-color: #5E5E5E;
+	text-color:white;
 }
