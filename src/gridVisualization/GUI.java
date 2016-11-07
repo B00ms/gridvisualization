@@ -74,7 +74,7 @@ public class GUI {
 	public enum VIEW_MODE {GRAPH_INSPECTION, GRAPH_GENERATION};
 	VIEW_MODE viewMode = VIEW_MODE.GRAPH_INSPECTION;
 	boolean autoLayoutOn = true;
-	
+	boolean actionListernersCreated = false;
 	
 	JTabbedPane tabbedPane = new JTabbedPane();
 	private JPanel selectionInfoPanel;
@@ -695,6 +695,9 @@ public class GUI {
 			}
 		});
 		
+		MouseListener[] mouseListArray = btnCalculateMetrics.getMouseListeners();
+		for(MouseListener l : mouseListArray)
+			btnCalculateMetrics.removeMouseListener(l);
 		
 		btnCalculateMetrics.addMouseListener(new MouseListener() {
 			
@@ -706,8 +709,7 @@ public class GUI {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				// TODO Auto-generated method stub	
 			}
 			
 			@Override
@@ -729,17 +731,8 @@ public class GUI {
 					graphLogic.calculateMetrics();
 			}
 		});
-/*		btnCalculateMetrics.addActionListener(new ActionListener() {
-			
-			
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Action.
-			
-				
-			}
-		});*/
+		 mouseListArray = btnCalculateMetrics.getMouseListeners();
+		 System.out.println();
 	}
 	
 	private void addToNodeList(Node node){
@@ -749,21 +742,21 @@ public class GUI {
 		case "ConventionalGenerator":
 			System.out.println("conv");
 			attr = "CG " + node.getAttribute("subType").toString() + " " +
-					node.getId() + " " + node.getAttribute("lowerGenLimit") + " " +
+					node.getAttribute("nodeId") + " " + node.getAttribute("lowerGenLimit") + " " +
 					node.getAttribute("upperGenLimit") + " " + node.getAttribute("costCoefficient");
 			break;
 		case "InnerNode":
-			attr = "IN " + node.getId();
+			attr = "IN " + 	node.getAttribute("nodeId");
 			break;
 		case "Consumer":
-			attr = "C " + node.getId() + " " + node.getAttribute("consumptionPercentage");
+			attr = "C " + 	node.getAttribute("nodeId") + " " + node.getAttribute("consumptionPercentage");
 			break;
 		case "RenewableGenerator":
-			attr = "RG " + node.getAttribute("subType") + " " + node.getId() + " " + node.getAttribute("maxProduction") +
+			attr = "RG " + node.getAttribute("subType") + " " + 	node.getAttribute("nodeId") + " " + node.getAttribute("maxProduction") +
 			" " + node.getAttribute("cuirtailmentCost") + " " + node.getAttribute("costCoefficient");
 			break;
 		case "Storage":
-			attr = "Storage " + node.getId() + " " + node.getAttribute("currentSoC") + " " + node.getAttribute("maxSoC") + 
+			attr = "Storage " + 	node.getAttribute("nodeId") + " " + node.getAttribute("currentSoC") + " " + node.getAttribute("maxSoC") + 
 			" " + node.getAttribute("minSoC") +  " " + node.getAttribute("chMax"); 
 			break;
 		default:
@@ -788,13 +781,13 @@ public class GUI {
 		edgeInfoPanel.removeAll();
 		edgeInfoPanel.revalidate();
 		edgeInfoPanel.repaint();
-		String nodeId = node.getId();
+		String nodeId = node.getAttribute("nodeId");
 
 		while (it.hasNext()){
 			Edge edge = it.next();
 			JPanel edgePanel = new JPanel();
 			edgePanel.setLayout(new GridLayout(3, 2));
-			if( edge.getNode0().getId().equals(nodeId)){
+			if( edge.getNode0().getAttribute("nodeId").equals(nodeId)){
 				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
 					"<"+edge.getNode0().getAttribute("ui.label")+">---<"+edge.getNode1().getAttribute("ui.label")+">"));
 			} else {

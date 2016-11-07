@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.swing.DefaultListModel;
@@ -63,7 +64,7 @@ public class GraphLogic {
 		String[] attributesArray = attributes.split("\\s");
 		switch(attributesArray[0]){
 		case "CG": 
-			newNode = graph.addNode(attributesArray[2]);
+			newNode = graph.addNode(UUID.randomUUID().toString());
 			newNode.addAttribute("ui.class", "ConventionalGenerator");
 			newNode.addAttribute("subType", attributesArray[1]); //node subtype
 			newNode.addAttribute("nodeId", attributesArray[2]);
@@ -72,10 +73,9 @@ public class GraphLogic {
 			newNode.addAttribute("upperGenLimit", attributesArray[4]);
 			newNode.addAttribute("costCoefficient", attributesArray[5]);
 			newNode.addAttribute("production", "0");
-			
 			break;
 		case "C":
-			newNode = graph.addNode(attributesArray[1]);
+			newNode = graph.addNode(UUID.randomUUID().toString());
 			newNode.addAttribute("ui.class", "Consumer");
 			newNode.addAttribute("nodeId", attributesArray[1]);
 			newNode.addAttribute("ui.label", attributesArray[1]);
@@ -83,10 +83,13 @@ public class GraphLogic {
 			newNode.addAttribute("load", "0");
 			break;
 		case "IN":
-			newNode = graph.addNode(attributesArray[1]);
+			newNode = graph.addNode(UUID.randomUUID().toString());
+			newNode.addAttribute("ui.class", "InnerNode"); 
+			newNode.addAttribute("ui.label", attributesArray[1]); //node subtype
+			newNode.addAttribute("nodeId", attributesArray[1]); //node subtype
 			break;
 		case "RG":
-			newNode = graph.addNode(attributesArray[2]);
+			newNode = graph.addNode(UUID.randomUUID().toString());
 			newNode.addAttribute("ui.class", "RenewableGenerator");
 			newNode.addAttribute("subType", attributesArray[1]); //node subtype
 			newNode.addAttribute("nodeId", attributesArray[2]); //node subtype
@@ -98,7 +101,7 @@ public class GraphLogic {
 			newNode.addAttribute("production", "0");
 			break;
 		case "Storage":
-			newNode = graph.addNode(attributesArray[1]);
+			newNode = graph.addNode(UUID.randomUUID().toString());
 			newNode.addAttribute("ui.class", "Storage");
 			newNode.addAttribute("nodeId", attributesArray[1]);
 			newNode.addAttribute("ui.label", attributesArray[1]);
@@ -111,9 +114,9 @@ public class GraphLogic {
 			newNode.addAttribute("status", "N/A");
 			break;
 		}
-		newNode = setAttributes(newNode, attributesArray);
+		//newNode = setAttributes(newNode, attributesArray);
 		Edge edge;
-		if(!attributesArray[0].equals("storage") || !attributesArray[0].equals("consumer"))
+		if(!attributesArray[0].equals("storage") && !attributesArray[0].equals("C"))
 			edge = graph.addEdge(UUID.randomUUID().toString(), newNode, node1);
 		else
 			edge = graph.addEdge(UUID.randomUUID().toString(), node1, newNode);
@@ -148,7 +151,7 @@ public class GraphLogic {
 	
 	public Node setAttributes(Node node, String[] attributes){
 		String nodeType = attributes[0];
-		node.addAttribute("ui.label", node.getId());
+		//node.addAttribute("ui.label", node.());
 		//node.addAttribute("ui.style", "fill-color: rgb(0,100,255);");
 		
 		switch(nodeType){
@@ -327,9 +330,9 @@ public class GraphLogic {
 				node.addAttribute("ui.label", arrayAttr[2]);
 				node.addAttribute("subType", arrayAttr[1]); //node subtype
 				node.addAttribute("nodeId", arrayAttr[2]);
-				node.addAttribute("lowerGenLimit", arrayAttr[2]); //lower gen limit
-				node.addAttribute("upperGenLimit", arrayAttr[3]);
-				node.addAttribute("costCoefficient", arrayAttr[4]);
+				node.addAttribute("lowerGenLimit", arrayAttr[3]); //lower gen limit
+				node.addAttribute("upperGenLimit", arrayAttr[4]);
+				node.addAttribute("costCoefficient", arrayAttr[5]);
 				node.addAttribute("production", "0");
 				break;
 			case "C":
@@ -372,7 +375,7 @@ public class GraphLogic {
 			case "IN":
 				graph.addNode(arrayAttr[1]);
 				node = graph.getNode(arrayAttr[1]);
-				node.addAttribute("ui.label", arrayAttr[1]);
+
 				node.addAttribute("nodeId", arrayAttr[1]);
 				node.addAttribute("ui.label", arrayAttr[1]);
 				node.addAttribute("ui.class", "InnerNode");
@@ -495,7 +498,6 @@ public class GraphLogic {
 		GraphMetrics gMetrics = new GraphMetrics();
 		double avgDegree= Toolkit.averageDegree(graph);
 		int[] degreeDistribution = Toolkit.degreeDistribution(graph);
-		double betweenessDistribution = 0;
 		
 		gMetrics.getBetweenessCentrality(graph);
 		for(Node node : graph){
@@ -509,12 +511,14 @@ public class GraphLogic {
 		double diameter = Toolkit.diameter(graph);
 		
 		System.out.println("avgDegree " + avgDegree);
-		System.out.println("betwebess " + betweenessDistribution);
+		System.out.println("degreeDist ");
+		for(Integer degree : degreeDistribution)
+			System.out.print(degree + " ");
+		System.out.println();
 		System.out.println("L " +L);
 		System.out.println("small world " + smallWorldProp);
 		System.out.println("clusting " + avgClusteringCoefficient);
 		System.out.println("diameter " + diameter);
-		System.out.println("roar");
 	}
 	
 	public void saveGraph(){
@@ -522,15 +526,25 @@ public class GraphLogic {
 		try{
 			Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("graph.csv"), "UTF-8"));
 			
-			Iterator<Node> nodeIt = graph.getNodeIterator();
+			//Iterator<Node> nodeIt = graph.getNodeIterator();
+			
+			TreeMap<Integer, Node> nodeTreeMap = new TreeMap<>();
+			
+			for(Node node:  graph){
+				nodeTreeMap.put(Integer.valueOf(node.getAttribute("nodeId")), node);
+			}
+			
 			String cGens = "";
 			String consumers = "";
 			String inners = "";
 			String rgens = "";
 			String stors = "";
 			
+			Iterator<Integer> nodeIt = nodeTreeMap.keySet().iterator();
+			
 			while(nodeIt.hasNext()){
-				Node node = nodeIt.next();
+//				Node node = nodeIt.next();
+				Node node = nodeTreeMap.get(nodeIt.next());
 				String subtype = "";
 				String nodeId = "";
 				String minGen = "";

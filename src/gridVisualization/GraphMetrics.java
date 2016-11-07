@@ -55,7 +55,7 @@ public class GraphMetrics {
 		double CRand = 0;
 		Graph randomGraph;
 		
-		for(int j = 0; j < 21; j++){
+		for(int j = 0; j < 100; j++){
 			randomGraph = new SingleGraph("Random graph");
 			Generator gen = new RandomGenerator(Toolkit.averageDegree(graph));
 			gen.addSink(randomGraph);
