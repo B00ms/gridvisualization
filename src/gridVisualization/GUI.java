@@ -75,7 +75,7 @@ public class GUI {
 	VIEW_MODE viewMode = VIEW_MODE.GRAPH_INSPECTION;
 	boolean autoLayoutOn = true;
 	boolean actionListernersCreated = false;
-	
+
 	JTabbedPane tabbedPane = new JTabbedPane();
 	private JPanel selectionInfoPanel;
 
@@ -109,7 +109,7 @@ public class GUI {
 	private JFileChooser fileChooser = new JFileChooser();
 	private JButton btnOpenSelectDirectory = new JButton("Select directory");
 	private String selectedDirectory = "";
-	
+
 	// Generation
 	private JButton btnsmallWorld = new JButton("Generate small world graph");
 	private DefaultListModel<String> listModel = new DefaultListModel<String>();
@@ -120,17 +120,17 @@ public class GUI {
 	private JButton btnSaveGraph = new JButton("Save Graph");
 	private JButton btnCalculateMetrics = new JButton("Calculate metrics");
 	private JButton btnGenPreferentialGraph= new JButton("Generate preferential attachment graph");
-	
+
 	private DefaultListModel<String> listModelEdges = new DefaultListModel<String>();
 	private JScrollPane scllPaneEdges = new JScrollPane();
-	private JList<String> edgesList = new JList<String>();		
-	
+	private JList<String> edgesList = new JList<String>();
+
 	private boolean fuckingleavethecomboboxalone = false;
 	boolean viewerInit = false;
-	
+
 	public enum KEY_DOWN {NONE, DELETE, ADD, ADD_EDGE, SHIFT};
 	private KEY_DOWN keydown;
-	
+
 	//Keeps tracks of the number of outer, inner and edges found in the network file that the users selects.
 	//Need these numbers when generating graphs.
 	int numOuterNodes, numInnerNodes, numOfEdges = 0;
@@ -162,24 +162,24 @@ public class GUI {
 		setuptimeStepDropDown("");
 		informationPanel.add(timestepDropdown);
 		informationPanel.add(Box.createRigidArea(new Dimension(500, 100)));
-		
+
 		setupNodeAndEdgeInfoPanel();
 
 		informationPanel.add(Box.createRigidArea(new Dimension(informationPanel.getWidth(), 800)));
 		//myFrame.getContentPane().add(informationPanel, BorderLayout.EAST);
 		myFrame.getContentPane().add(tabbedPane, BorderLayout.EAST);
 		tabbedPane.addChangeListener(new ChangeListener() {
-			
+
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				if(viewMode == VIEW_MODE.GRAPH_GENERATION)
 					viewMode = VIEW_MODE.GRAPH_INSPECTION;
 				else if(viewMode == VIEW_MODE.GRAPH_INSPECTION)
-					viewMode = VIEW_MODE.GRAPH_GENERATION;	
+					viewMode = VIEW_MODE.GRAPH_GENERATION;
 			}
 		});
 	}
-	
+
 	private void setuptimeStepDropDown(String selectedDirectory){
 		File folder;
 		if(!selectedDirectory.isEmpty())
@@ -214,7 +214,7 @@ public class GUI {
 		selectionInfoPanel.add(lblType);
 		selectionInfoPanel.setVisible(true);
 		informationPanel.add(selectionInfoPanel);
-	
+
 		// Conventional and renewable info panel
 		convAndRewGenerationInfoPanel = new JPanel(new GridLayout(3, 2));
 		convAndRewGenerationInfoPanel.setBorder(BorderFactory.createTitledBorder("Generator information"));
@@ -232,7 +232,7 @@ public class GUI {
 		convAndRewGenerationInfoPanel.add(new Label("Failure: "));
 		convAndRewGenerationInfoPanel.add(lblFailure);
 		informationPanel.add(convAndRewGenerationInfoPanel);
-	
+
 		// Storage info panel
 		storageInfoPanel = new JPanel(new GridLayout(3, 2));
 		storageInfoPanel.setBorder(BorderFactory.createTitledBorder("Storage information"));
@@ -248,57 +248,57 @@ public class GUI {
 		storageInfoPanel.add(lblDischargeEfficiency);
 		storageInfoPanel.setVisible(false);
 		informationPanel.add(storageInfoPanel);
-	
+
 		consumerInfoPanel = new JPanel(new GridLayout(1, 2));
 		consumerInfoPanel.setBorder(BorderFactory.createTitledBorder("Consumer information"));
 		consumerInfoPanel.add(new Label("Load: "));
 		consumerInfoPanel.add(lblLoad);
 		consumerInfoPanel.setVisible(false);
 		informationPanel.add(consumerInfoPanel);
-	
+
 		edgeInfoPanel = new JPanel(new GridLayout(3, 2));
 		edgeInfoPanel.setLayout(new BoxLayout(edgeInfoPanel, BoxLayout.Y_AXIS));
 		edgeInfoPanel.setBorder(BorderFactory.createTitledBorder("Edge information"));
-	
+
 		edgeInfoPanel.setVisible(true);
 		edgeInfoPanel.add(new Label(" "));
 		informationPanel.add(edgeInfoPanel);
-	
+
 		generationPanel = new JPanel(new GridBagLayout());
 		generationPanel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		generationPanel.setVisible(true);
-		
+
 		GridBagConstraints constr = new GridBagConstraints();
-			
+
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.gridx = 0;
 		constr.gridy = 0;
 		constr.insets = new Insets(0, 2, 2, 2);
 		generationPanel.add(btnsmallWorld, constr);
-		
+
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.weightx = 0.5;
 		constr.gridx = 1;
 		constr.gridy = 0;
 		constr.insets = new Insets(0, 2, 2, 2);
 		generationPanel.add(btnLoadNodeList, constr);
-			
+
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.weightx = 0.0;
 		constr.gridx = 0;
 		constr.gridy = 1;
 		generationPanel.add(btnGenPreferentialGraph, constr);
-		
+
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.weightx = 0.0;
 		constr.gridx = 1;
 		constr.gridy = 1;
 		constr.insets = new Insets(2, 2, 2, 2);
 		generationPanel.add(btnCalculateMetrics, constr);
-		
+
 		constr.fill = GridBagConstraints.BOTH;
 		constr.weightx = 1.0;
-		constr.weighty = 1.0;  
+		constr.weighty = 1.0;
 		constr.gridx = 0;
 		constr.gridy = 2;
 		constr.gridwidth = 1;
@@ -307,13 +307,13 @@ public class GUI {
 
 		constr.fill = GridBagConstraints.BOTH;
 		constr.weightx = 1.0;
-		constr.weighty = 1.0;  
+		constr.weighty = 1.0;
 		constr.gridx = 1;
 		constr.gridy = 2;
 		constr.gridwidth = 1;
 		constr.anchor = GridBagConstraints.PAGE_END;
 		generationPanel.add(scllPaneEdges, constr);
-		
+
 		constr.fill = GridBagConstraints.HORIZONTAL;
 		constr.ipady = 0;       //reset to default
 		constr.weighty = 0.05;   //request any extra vertical space
@@ -325,25 +325,25 @@ public class GUI {
 		generationPanel.add(btnSaveGraph, constr);
 
 		informationPanel.add(generationPanel);
-		
+
 		tabbedPane.addTab("Inspection", informationPanel);
 		tabbedPane.addTab("Generation", generationPanel);
 	}
 
 	private void setupInfoPanelActionListeners(){
-		
+
 		btnSaveGraph.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				graphLogic.saveGraph();
-				
+
 			}
 		});
-		
+
 		btnGenPreferentialGraph.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				loadEdgesAndNodes(e);
@@ -352,7 +352,7 @@ public class GUI {
 				setupGraphStreamView();
 			}
 		});
-		
+
 		timestepDropdown.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -380,14 +380,14 @@ public class GUI {
 						timestepDropdown.setSelectedIndex(timeStepSelectionIndex);
 						fuckingleavethecomboboxalone = false;
 						graphstateSelected(timestepDropdown.getItemAt(timeStepSelectionIndex).toString());
-						
+
 					}
 				}
 
 			}
 		});
-		
-		btnsmallWorld.addActionListener(new ActionListener() {		
+
+		btnsmallWorld.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				loadEdgesAndNodes(e);
@@ -396,14 +396,14 @@ public class GUI {
 				setupGraphStreamView();
 			}
 		});
-		
+
 		btnLoadNodeList.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == btnLoadNodeList){
 					loadEdgesAndNodes(e);
-					
+
 					graphLogic.loadGraph(nodeList, edgesList);
 					setupGraphStreamView();
 					listModel.clear();
@@ -411,9 +411,9 @@ public class GUI {
 				}
 			}
 		});
-		
+
 	}
-	
+
 	private void loadEdgesAndNodes(ActionEvent e){
 
 		if(e.getSource() == btnLoadNodeList || e.getSource() == btnsmallWorld || e.getSource() == btnGenPreferentialGraph){
@@ -425,13 +425,13 @@ public class GUI {
 			numOuterNodes = 0;
 			numInnerNodes = 0;
 			numOfEdges = 0;
-			
+
 			int option = nodeListChooser.showOpenDialog(myFrame);
 			if(option == nodeListChooser.APPROVE_OPTION){
 				String selectedFile = nodeListChooser.getSelectedFile().getPath();
 				NodeListParser parser = new NodeListParser();
 				List<List<List<String>>> attributes =  parser.parseNodeList(selectedFile);
-				
+
 				List<List<String>> nodeMap = attributes.get(0);
 				Iterator<List<String>> it = nodeMap.iterator();
 				while(it.hasNext()){
@@ -470,11 +470,11 @@ public class GUI {
 			}
 		}
 	}
-	
+
 	private void calculateNumberOfNodesAndEdges(String value){
-		
+
 		if (value.equals("CG") || value.equals("C") || value.equals("RG") || value.equals("Storage")){
-			numOuterNodes++;	
+			numOuterNodes++;
 		}else if( value.equals("IN")){
 			numInnerNodes++;
 		}else if(value.equals("AE"))
@@ -482,7 +482,7 @@ public class GUI {
 	}
 
 	private void setupActionListeners() {
-		
+
 		view.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -502,25 +502,25 @@ public class GUI {
 			public void mouseDragged(MouseEvent e) {
 			}
 		});
-		
+
 		view.addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				// TODO Auto-generated method stub
-				keydown = KEY_DOWN.NONE;		
+				keydown = KEY_DOWN.NONE;
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
-				
+
 				switch(e.getKeyCode()){
 				case KeyEvent.VK_D:
 					keydown = KEY_DOWN.DELETE;
@@ -546,7 +546,7 @@ public class GUI {
 				default:
 					keydown = KEY_DOWN.NONE;
 					break;
-						
+
 				}
 			}
 		});
@@ -575,7 +575,7 @@ public class GUI {
 				// TODO Auto-generated method stub
 
 			}
-			
+
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -588,9 +588,9 @@ public class GUI {
 							Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 							lblIdentifier.setText(node.getAttribute("ui.label"));
 							lblType.setText(node.getAttribute("ui.class").toString());
-	
+
 							setEdgeInformation(node);
-					
+
 							switch (lblType.getText()) {
 							case "ConventionalGenerator":
 								lblSubType.setText(node.getAttribute("subType").toString());
@@ -624,7 +624,7 @@ public class GUI {
 								break;
 							case "Consumer":
 								lblLoad.setText(node.getAttribute("load").toString());
-	
+
 								convAndRewGenerationInfoPanel.setVisible(false);
 								storageInfoPanel.setVisible(false);
 								consumerInfoPanel.setVisible(true);
@@ -635,7 +635,7 @@ public class GUI {
 								lblMinimumCharge.setText(node.getAttribute("minSoC").toString());
 								lblChargeEfficiency.setText(node.getAttribute("chargeEfficiency").toString());
 								lblDischargeEfficiency.setText(node.getAttribute("dischargeEfficiency").toString());
-	
+
 								convAndRewGenerationInfoPanel.setVisible(false);
 								storageInfoPanel.setVisible(true);
 								consumerInfoPanel.setVisible(false);
@@ -650,7 +650,7 @@ public class GUI {
 								addToNodeList(node);
 							} else if(keydown == KEY_DOWN.ADD){
 								//String id = String.valueOf(System.currentTimeMillis());
-								graphLogic.addNode(gfxNode, nodeList, edgesList);							
+								graphLogic.addNode(gfxNode, nodeList, edgesList);
 								//Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 								//id = UUID.randomUUID().toString();
 								//graphLogic.getGraph().addEdge(id, node, newNode);
@@ -671,10 +671,10 @@ public class GUI {
 										((DefaultListModel<String>)edgesList.getModel()).remove(0);
 											nodeOne = "";
 									}
-								}	
+								}
 							}else if(keydown == KEY_DOWN.SHIFT){
 								addToNodeList(graphLogic.getGraph().getNode(gfxNode.getId()));
-							}else{			
+							}else{
 								graphLogic.assignNode(gfxNode, nodeList);
 								/*Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 								String attributes = nodeList.getModel().getElementAt(0);
@@ -694,36 +694,36 @@ public class GUI {
 				}
 			}
 		});
-		
+
 		MouseListener[] mouseListArray = btnCalculateMetrics.getMouseListeners();
 		for(MouseListener l : mouseListArray)
 			btnCalculateMetrics.removeMouseListener(l);
-		
+
 		btnCalculateMetrics.addMouseListener(new MouseListener() {
-			
+
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub	
+				// TODO Auto-generated method stub
 			}
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// TODO Auto-generated method stub
@@ -734,9 +734,9 @@ public class GUI {
 		 mouseListArray = btnCalculateMetrics.getMouseListeners();
 		 System.out.println();
 	}
-	
+
 	private void addToNodeList(Node node){
-		
+
 		String attr = null;
 		switch (node.getAttribute("ui.class").toString()) {
 		case "ConventionalGenerator":
@@ -756,8 +756,8 @@ public class GUI {
 			" " + node.getAttribute("cuirtailmentCost") + " " + node.getAttribute("costCoefficient");
 			break;
 		case "Storage":
-			attr = "Storage " + 	node.getAttribute("nodeId") + " " + node.getAttribute("currentSoC") + " " + node.getAttribute("maxSoC") + 
-			" " + node.getAttribute("minSoC") +  " " + node.getAttribute("chMax"); 
+			attr = "Storage " + 	node.getAttribute("nodeId") + " " + node.getAttribute("currentSoC") + " " + node.getAttribute("maxSoC") +
+			" " + node.getAttribute("minSoC") +  " " + node.getAttribute("chMax");
 			break;
 		default:
 			break;
@@ -765,29 +765,29 @@ public class GUI {
 		listModel.add(0, attr);
 		node.clearAttributes();
 	}
-	
+
 	private void addEdgeToList(Collection<Edge> edgeCol){
-		
+
 		for(Edge edge : edgeCol){
 			String strEdge = "AE " + edge.getAttribute("edgeId") + " " + edge.getNode0().getAttribute("nodeId") + " " + edge.getNode1().getAttribute("nodeId") +" " + edge.getAttribute("reactance") + " " + edge.getAttribute("capacity");
 			listModelEdges.add(0, strEdge);
 			edge.clearAttributes();
 		}
-		
+
 	}
-	
+
 	private void setEdgeInformation(Node node){
 		Iterator<Edge> it = node.getEdgeSet().iterator();
 		edgeInfoPanel.removeAll();
 		edgeInfoPanel.revalidate();
 		edgeInfoPanel.repaint();
-		String nodeId = node.getAttribute("nodeId");
+		String nodeId = node.getAttribute("ui.label");
 
 		while (it.hasNext()){
 			Edge edge = it.next();
 			JPanel edgePanel = new JPanel();
 			edgePanel.setLayout(new GridLayout(3, 2));
-			if( edge.getNode0().getAttribute("nodeId").equals(nodeId)){
+			if( edge.getNode0().getAttribute("ui.label").equals(nodeId)){
 				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
 					"<"+edge.getNode0().getAttribute("ui.label")+">---<"+edge.getNode1().getAttribute("ui.label")+">"));
 			} else {
@@ -798,7 +798,7 @@ public class GUI {
 			Label lblFlow = new Label();
 			Label lblCapacity = new Label();
 			Label lblReactance = new Label();
-			
+
 			if(node.getAttribute("ui.class").equals("Consumer")){
 				double flow = Double.parseDouble(edge.getAttribute("flow"));
 				if (flow > 0)
@@ -814,12 +814,12 @@ public class GUI {
 					if (flow < 0)
 						flow = Math.abs(flow);
 					lblFlow.setText(String.valueOf(flow));
-				} else {	
+				} else {
 					lblFlow.setText(String.valueOf(flow));
 				}
 			}else
 				lblFlow.setText(edge.getAttribute("flow"));
-			
+
 			lblCapacity.setText(edge.getAttribute("capacity"));
 			lblReactance.setText(edge.getAttribute("reactance"));
 
