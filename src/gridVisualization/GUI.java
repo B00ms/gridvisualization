@@ -781,13 +781,13 @@ public class GUI {
 		edgeInfoPanel.removeAll();
 		edgeInfoPanel.revalidate();
 		edgeInfoPanel.repaint();
-		String nodeId = node.getAttribute("nodeId");
+		String nodeId = node.getAttribute("ui.label");
 
 		while (it.hasNext()){
 			Edge edge = it.next();
 			JPanel edgePanel = new JPanel();
 			edgePanel.setLayout(new GridLayout(3, 2));
-			if( edge.getNode0().getAttribute("nodeId").equals(nodeId)){
+			if( edge.getNode0().getAttribute("ui.label").equals(nodeId)){
 				edgePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
 					"<"+edge.getNode0().getAttribute("ui.label")+">---<"+edge.getNode1().getAttribute("ui.label")+">"));
 			} else {
