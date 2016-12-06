@@ -212,7 +212,7 @@ public class GraphLogic {
 		 while (nodeIterator.hasNext()){
 			 Node node = nodeIterator.next();
 			 node.addAttribute("ui.style", "");
-			 node.addAttribute("layout.weight", 20);
+			 node.addAttribute("layout.weight", 10);
 
 			 if (node.getAttribute("ui.class").equals("ConventionalGenerator")){
 				 if ((boolean) node.getAttribute("failure"))
@@ -243,11 +243,12 @@ public class GraphLogic {
 		 java.util.Iterator<Edge> edgesIterator = graph.getEdgeIterator();
 		 while (edgesIterator.hasNext()){
 			 Edge edge = edgesIterator.next();
+			 edge.addAttribute("layout.weight", 2);
 
 			 if (maxCapacity < edge.getNumber("capacity"))
-				 maxCapacity =  edge.getNumber("capacity");
+				 maxCapacity =  (edge.getNumber("capacity")*0.87)*2.5;
 			 else if (minCapacity > edge.getNumber("capacity"))
-				 minCapacity = edge.getNumber("capacity");
+				 minCapacity = (edge.getNumber("capacity")*0.87)*2.5;
 
 			 if (maxFlow < edge.getNumber("flow"))
 				 maxFlow =  edge.getNumber("flow");
@@ -255,11 +256,11 @@ public class GraphLogic {
 				 minFlow = edge.getNumber("flow");
 		 }
 
-		 edgesIterator = graph.getEdgeIterator();
+		edgesIterator = graph.getEdgeIterator();
 		while (edgesIterator.hasNext()){
 			Edge edge = edgesIterator.next();
 			double flow = Double.parseDouble(edge.getAttribute("flow"));
-			double capacity = Double.parseDouble(edge.getAttribute("capacity"));
+			double capacity = (Double.parseDouble(edge.getAttribute("capacity"))*0.87)*2.5;
 
 			if(Math.abs(flow) > capacity) //Line is being overloaded
 				edge.addAttribute("ui.style", "fill-color:red;");

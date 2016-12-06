@@ -675,7 +675,8 @@ public class GUI {
 							}else if(keydown == KEY_DOWN.SHIFT){
 								addToNodeList(graphLogic.getGraph().getNode(gfxNode.getId()));
 							}else{			
-								graphLogic.assignNode(gfxNode, nodeList);
+								if(viewMode == VIEW_MODE.GRAPH_INSPECTION)
+									graphLogic.assignNode(gfxNode, nodeList);
 								/*Node node = graphLogic.getGraph().getNode(gfxNode.getId());
 								String attributes = nodeList.getModel().getElementAt(0);
 								String[] attributesArray = attributes.split("\\s");
